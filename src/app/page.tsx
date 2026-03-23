@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { Github, Linkedin, Mail, Terminal, Database, Server, Cpu, Globe, Cloud, Activity, X, ArrowRight, CheckCircle2, FileText, Image as ImageIcon } from "lucide-react";
 import Starfield from "@/components/Starfield";
+import ImageGallery from "@/components/ImageGallery";
 
 const projects = [
   {
@@ -17,6 +18,7 @@ const projects = [
     iconBg: "bg-blue-500/10 text-blue-400 border-blue-500/20",
     fullDesc: "Managing self-hosted VPS environments and containers across multiple nodes can become chaotic. I built InfraSight as a centralized command center that visualizes Docker stats, network traffic, and PostgreSQL health in real-time. It features an integrated AI terminal connected to a local Ollama instance for instant anomaly analysis.",
     link: "/infrasight",
+    images: [],
     mockup: (
       <div className="mt-6 rounded-xl border border-zinc-800 bg-[#050505] p-4 font-mono text-xs overflow-hidden relative">
         <div className="flex items-center justify-between border-b border-zinc-800 pb-3 mb-3">
@@ -48,6 +50,7 @@ const projects = [
     iconBg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
     fullDesc: "Opportunity Radar (radarX) is a powerful intelligence system designed to discover, score, validate, and route high-signal opportunities from online platforms in real-time. By connecting directly to automated ingestion workflows via n8n, it cuts through the noise of the internet. The killer feature? A secure reverse SSH tunnel that pushes AI classification tasks from the cloud VPS to a local machine running Ollama, reducing inference costs to zero.",
     link: "https://radarx.mooo.com/",
+    images: ["/radarx-1.png", "/radarx-2.png", "/radarx-3.png", "/radarx-4.png", "/radarx-5.png"],
     mockup: (
       <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950 p-4">
         <div className="flex justify-between items-center mb-4">
@@ -88,6 +91,7 @@ const projects = [
     iconBg: "bg-purple-500/10 text-purple-400 border-purple-500/20",
     fullDesc: "FinHub-TN is a distributed fintech architecture designed to facilitate secure, trustless peer-to-peer transactions. I decoupled the backend (Symfony REST API) from the frontend (JavaFX) and integrated an event-driven automation layer using self-hosted n8n. Webhooks trigger a custom Telegram Bot that allows administrators to remotely control wallets, guaranteeing absolute transaction atomicity.",
     link: "https://www.finhub.tn/",
+    images: [],
     mockup: (
       <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950 p-4">
         <div className="flex items-center gap-2 mb-4 text-sm font-medium text-zinc-300">
@@ -114,12 +118,12 @@ const projects = [
 export default function Home() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: { y: 0, opacity: 1, transition: { duration: 0.5, ease: "easeOut" } },
   };
@@ -143,17 +147,19 @@ export default function Home() {
           variants={containerVariants}
           className="max-w-4xl space-y-8 min-h-[70vh] flex flex-col justify-center"
         >
-          <motion.div variants={itemVariants} className="inline-flex items-center rounded-full border border-zinc-800 bg-zinc-900/50 px-3 py-1 text-sm text-zinc-400 backdrop-blur-sm">
-            <span className="flex h-2 w-2 rounded-full bg-cyan-400 mr-2 animate-pulse"></span>
-            Engineering Student at ESPRIT
-          </motion.div>
-          
+          <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/50 border border-zinc-800 text-xs font-medium text-zinc-400 w-max backdrop-blur-sm">
+    <span className="relative flex h-2 w-2">
+      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+    </span>
+    Available for Internships 
+  </motion.div>
           <motion.h1 variants={itemVariants} className="text-5xl font-bold tracking-tight md:text-7xl lg:text-8xl bg-gradient-to-br from-zinc-100 via-zinc-300 to-zinc-600 bg-clip-text text-transparent">
             Sadok Dridi.
           </motion.h1>
           
           <motion.p variants={itemVariants} className="text-xl text-zinc-400 md:text-2xl font-light max-w-2xl leading-relaxed">
-            I build <span className="text-zinc-100 font-medium">distributed systems</span>, secure fintech platforms, and <span className="text-cyan-400 font-medium">hybrid AI pipelines</span>. Full Stack Engineer specializing in automation.
+            <span className="text-zinc-100 font-medium">Full Stack Engineer</span> building scalable applications, AI-driven systems, and <span className="text-cyan-400 font-medium">automated</span> solutions for real-world problems.
           </motion.p>
 
           <motion.div variants={itemVariants} className="flex flex-wrap gap-4 pt-4">
@@ -345,20 +351,29 @@ export default function Home() {
                     <p>{project.fullDesc}</p>
                   </div>
 
-                  <div className="mb-10">
-                    <h3 className="text-lg font-semibold mb-4 text-zinc-100 flex items-center gap-2">
-                      <ImageIcon size={18} className="text-pink-500" /> Interface Gallery
-                    </h3>
-                    <motion.div 
-                      whileHover={{ scale: 1.02 }}
-                      className="w-full h-64 md:h-80 rounded-xl border border-zinc-800 bg-zinc-900/40 flex flex-col items-center justify-center text-zinc-500 relative overflow-hidden group cursor-pointer shadow-lg"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <ImageIcon size={40} className="mb-3 opacity-30 group-hover:opacity-60 transition-opacity group-hover:scale-110 duration-500" />
-                      <p className="text-sm font-medium text-zinc-400">Awaiting Real Screenshots</p>
-                      <p className="text-xs text-zinc-600 mt-2 max-w-xs text-center">Place your project images here to enable 3D tilt effects and lightbox viewing.</p>
-                    </motion.div>
-                  </div>
+                  {project.images && project.images.length > 0 ? (
+                    <div className="mb-10">
+                      <h3 className="text-lg font-semibold mb-4 text-zinc-100 flex items-center gap-2">
+                        <ImageIcon size={18} className="text-pink-500" /> Interface Gallery
+                      </h3>
+                      <ImageGallery images={project.images} />
+                    </div>
+                  ) : (
+                    <div className="mb-10">
+                      <h3 className="text-lg font-semibold mb-4 text-zinc-100 flex items-center gap-2">
+                        <ImageIcon size={18} className="text-pink-500" /> Interface Gallery
+                      </h3>
+                      <motion.div 
+                        whileHover={{ scale: 1.02 }}
+                        className="w-full h-64 md:h-80 rounded-xl border border-zinc-800 bg-zinc-900/40 flex flex-col items-center justify-center text-zinc-500 relative overflow-hidden group cursor-pointer shadow-lg"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <ImageIcon size={40} className="mb-3 opacity-30 group-hover:opacity-60 transition-opacity group-hover:scale-110 duration-500" />
+                        <p className="text-sm font-medium text-zinc-400">Awaiting Real Screenshots</p>
+                        <p className="text-xs text-zinc-600 mt-2 max-w-xs text-center">Place your project images here to enable 3D tilt effects and lightbox viewing.</p>
+                      </motion.div>
+                    </div>
+                  )}
 
                   <div className="mb-10">
                     <h3 className="text-lg font-semibold mb-4 text-zinc-100 flex items-center gap-2">
