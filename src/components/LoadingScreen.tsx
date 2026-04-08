@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 interface LoadingScreenProps {
   onComplete?: () => void;
@@ -13,112 +12,110 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
   const percentRef = useRef<HTMLSpanElement>(null);
   const lineLeftRef = useRef<HTMLDivElement>(null);
   const lineRightRef = useRef<HTMLDivElement>(null);
+  const [isExiting, setIsExiting] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const hasRun = useRef(false);
+
+  // Memoize onComplete to avoid dependency issues
+  const handleComplete = useCallback(() => {
+    onComplete?.();
+  }, [onComplete]);
 
   useEffect(() => {
+    // Prevent double execution in strict mode
+    if (hasRun.current) return;
+    hasRun.current = true;
+
     // Check if already visited this session
     let skipLoading = false;
     try {
       skipLoading = sessionStorage.getItem('hasVisited') === 'true';
-    } catch (e) {}
+    } catch {
+      // sessionStorage not available
+    }
 
     if (skipLoading) {
       setIsHidden(true);
-      onComplete?.();
+      handleComplete();
       return;
     }
 
     // Lock body scroll
     document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.inset = '0';
 
-    const logo = logoRef.current;
-    const percentEl = percentRef.current;
-    const lineLeft = lineLeftRef.current;
-    const lineRight = lineRightRef.current;
-    const container = containerRef.current;
+    // Animate progress from 0 to 100 using requestAnimationFrame
+    const duration = 2500; // 2.5 seconds
+    const startTime = performance.now();
 
-    if (!percentEl || !container || !logo) {
-      // Fallback if refs not ready
-      setTimeout(() => {
-        setIsHidden(true);
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.inset = '';
-        onComplete?.();
-      }, 100);
-      return;
-    }
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const rawProgress = Math.min(elapsed / duration, 1);
+      
+      // Ease in-out curve
+      const eased = rawProgress < 0.5
+        ? 2 * rawProgress * rawProgress
+        : 1 - Math.pow(-2 * rawProgress + 2, 2) / 2;
+      
+      const currentProgress = Math.round(eased * 100);
+      setProgress(currentProgress);
 
-    // Animate progress from 0 to 100 over 2.5 seconds
-    // Logo opacity syncs with progress
-    const duration = 2.5;
-    const progressObj = { value: 0 };
+      // Update logo opacity directly
+      if (logoRef.current) {
+        logoRef.current.style.opacity = String(eased);
+      }
 
-    // Animate the lines expanding
-    if (lineLeft && lineRight) {
-      gsap.fromTo(
-        [lineLeft, lineRight],
-        { scaleX: 0 },
-        { scaleX: 1, duration: duration, ease: 'power2.inOut' }
-      );
-    }
+      // Update lines scale
+      if (lineLeftRef.current) {
+        lineLeftRef.current.style.transform = `scaleX(${eased})`;
+      }
+      if (lineRightRef.current) {
+        lineRightRef.current.style.transform = `scaleX(${eased})`;
+      }
 
-    gsap.to(progressObj, {
-      value: 100,
-      duration: duration,
-      ease: 'power2.inOut',
-      onUpdate: () => {
-        const val = Math.round(progressObj.value);
-        percentEl.textContent = val.toString().padStart(3, '0');
-        
-        // Logo fades in as progress increases (0% = 0 opacity, 100% = 1 opacity)
-        logo.style.opacity = (progressObj.value / 100).toString();
-      },
-      onComplete: () => {
-        // Hold at 100% briefly
+      if (rawProgress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        // Animation complete - hold briefly then exit
         setTimeout(() => {
-          // Exit animation - slide up and fade out
-          const tl = gsap.timeline({
-            onComplete: () => {
-              // Restore body
-              document.body.style.overflow = '';
-              document.body.style.position = '';
-              document.body.style.inset = '';
-              
-              setIsHidden(true);
-              onComplete?.();
-
-              // Mark as visited
-              try {
-                sessionStorage.setItem('hasVisited', 'true');
-              } catch (e) {}
+          setIsExiting(true);
+          
+          // Wait for exit animation then hide
+          setTimeout(() => {
+            document.body.style.overflow = '';
+            setIsHidden(true);
+            handleComplete();
+            
+            // Mark as visited
+            try {
+              sessionStorage.setItem('hasVisited', 'true');
+            } catch {
+              // sessionStorage not available
             }
-          });
-
-          tl.to(container, {
-            yPercent: -100,
-            duration: 0.8,
-            ease: 'power3.inOut',
-          });
+          }, 800);
         }, 400);
       }
+    };
+
+    // Start animation on next frame to ensure DOM is ready
+    requestAnimationFrame(() => {
+      requestAnimationFrame(animate);
     });
 
     return () => {
       document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.inset = '';
     };
-  }, [onComplete]);
+  }, [handleComplete]);
 
+  // Don't render if hidden
   if (isHidden) return null;
 
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-[9999] bg-zinc-950 flex items-center justify-center overflow-hidden"
+      className={`fixed inset-0 z-[9999] bg-zinc-950 flex items-center justify-center overflow-hidden transition-transform duration-700 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+        isExiting ? '-translate-y-full' : 'translate-y-0'
+      }`}
     >
       {/* Subtle gradient background */}
       <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-zinc-900/50 to-zinc-950" />
@@ -132,7 +129,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
         {/* Logo - fades in with progress */}
         <div 
           ref={logoRef} 
-          className="mb-12 sm:mb-16"
+          className="mb-12 sm:mb-16 transition-opacity"
           style={{ opacity: 0 }}
         >
           <h1 className="text-6xl sm:text-7xl md:text-9xl font-bold text-white tracking-tighter">
@@ -146,7 +143,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
           {/* Left line */}
           <div 
             ref={lineLeftRef}
-            className="w-12 sm:w-20 md:w-32 h-[1px] bg-gradient-to-r from-transparent to-zinc-600 origin-right"
+            className="w-12 sm:w-20 md:w-32 h-[1px] bg-gradient-to-r from-transparent to-zinc-600 origin-right transition-transform"
             style={{ transform: 'scaleX(0)' }}
           />
           
@@ -154,9 +151,9 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
           <div className="flex items-baseline">
             <span 
               ref={percentRef} 
-              className="text-xl sm:text-2xl md:text-3xl font-mono font-light text-zinc-400 tracking-widest"
+              className="text-xl sm:text-2xl md:text-3xl font-mono font-light text-zinc-400 tracking-widest tabular-nums"
             >
-              000
+              {progress.toString().padStart(3, '0')}
             </span>
             <span className="text-sm sm:text-base text-zinc-600 font-mono ml-1">%</span>
           </div>
@@ -164,7 +161,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
           {/* Right line */}
           <div 
             ref={lineRightRef}
-            className="w-12 sm:w-20 md:w-32 h-[1px] bg-gradient-to-l from-transparent to-zinc-600 origin-left"
+            className="w-12 sm:w-20 md:w-32 h-[1px] bg-gradient-to-l from-transparent to-zinc-600 origin-left transition-transform"
             style={{ transform: 'scaleX(0)' }}
           />
         </div>

@@ -28,24 +28,16 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Animate header on mount
+  // Animate header on mount - simple animation, no delay needed
+  // The parent controls visibility, so this just animates when visible
   useEffect(() => {
     const header = headerRef.current;
     if (!header) return;
 
-    // Check if loading screen was already shown this session
-    let hasVisited = false;
-    try {
-      hasVisited = sessionStorage.getItem('hasVisited') === 'true';
-    } catch (e) {}
-
-    // If already visited, show header immediately; otherwise wait for loading screen
-    const delay = hasVisited ? 0.1 : 2.8;
-
     gsap.fromTo(
       header,
-      { y: -100, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay }
+      { y: -50, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', delay: 0.2 }
     );
   }, []);
 

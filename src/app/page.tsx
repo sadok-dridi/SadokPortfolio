@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import LoadingScreen from '@/components/LoadingScreen';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -12,17 +12,42 @@ import { TextMarquee } from '@/components/ui/Marquee';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
+  const [showContent, setShowContent] = useState(false);
+
+  // Check if we should skip loading on mount
+  useEffect(() => {
+    let skipLoading = false;
+    try {
+      skipLoading = sessionStorage.getItem('hasVisited') === 'true';
+    } catch {
+      // sessionStorage not available
+    }
+    
+    if (skipLoading) {
+      setIsLoading(false);
+      setShowContent(true);
+    }
+  }, []);
+
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+    // Small delay before showing content for smooth transition
+    setTimeout(() => {
+      setShowContent(true);
+    }, 100);
+  };
 
   return (
     <>
-      <LoadingScreen onComplete={() => setIsLoading(false)} />
+      <LoadingScreen onComplete={handleLoadingComplete} />
       
       {/* Page content - completely hidden until loading completes */}
       <div 
+        className={`transition-opacity duration-500 ease-out ${
+          showContent ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
         style={{ 
-          visibility: isLoading ? 'hidden' : 'visible',
-          opacity: isLoading ? 0 : 1,
-          transition: 'opacity 0.3s ease-out',
+          visibility: showContent ? 'visible' : 'hidden',
         }}
       >
         <Header />
