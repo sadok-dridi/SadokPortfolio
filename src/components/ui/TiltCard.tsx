@@ -27,12 +27,23 @@ export default function TiltCard({
   onMouseLeave: onMouseLeaveProp,
 }: TiltCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const glareRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [transform, setTransform] = useState('');
   const [glareStyle, setGlareStyle] = useState({ x: 50, y: 50 });
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile on mount
+  useEffect(() => {
+    const checkMobile = () => {
+      return 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 768;
+    };
+    setIsMobile(checkMobile());
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Disable tilt on mobile
+    if (isMobile) return;
+    
     const card = cardRef.current;
     if (!card) return;
 
@@ -43,7 +54,6 @@ export default function TiltCard({
     const mouseX = e.clientX - centerX;
     const mouseY = e.clientY - centerY;
     
-    // Calculate rotation
     const rotateY = (mouseX / (rect.width / 2)) * tiltAmount;
     const rotateX = -(mouseY / (rect.height / 2)) * tiltAmount;
     
@@ -54,22 +64,32 @@ export default function TiltCard({
       scale3d(${scale}, ${scale}, ${scale})
     `);
 
-    // Calculate glare position
     const glareX = ((e.clientX - rect.left) / rect.width) * 100;
     const glareY = ((e.clientY - rect.top) / rect.height) * 100;
     setGlareStyle({ x: glareX, y: glareY });
   };
 
   const handleMouseEnter = () => {
+    if (isMobile) return;
     setIsHovered(true);
     onMouseEnterProp?.();
   };
 
   const handleMouseLeave = () => {
+    if (isMobile) return;
     setIsHovered(false);
     setTransform('');
     onMouseLeaveProp?.();
   };
+
+  // On mobile, just render children without effects
+  if (isMobile) {
+    return (
+      <div className={className}>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div
@@ -88,10 +108,9 @@ export default function TiltCard({
     >
       {children}
       
-      {/* Glare overlay */}
+      {/* Glare overlay - only on desktop */}
       {glare && (
         <div
-          ref={glareRef}
           className={cn(
             'absolute inset-0 pointer-events-none rounded-[inherit] overflow-hidden transition-opacity duration-300',
             isHovered ? 'opacity-100' : 'opacity-0'

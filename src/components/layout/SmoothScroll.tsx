@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, ReactNode } from 'react';
+import { useEffect, useRef, ReactNode, useState } from 'react';
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -13,16 +13,30 @@ interface SmoothScrollProps {
 
 export default function SmoothScroll({ children }: SmoothScrollProps) {
   const lenisRef = useRef<Lenis | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Initialize Lenis
+    // Check if mobile/touch device
+    const checkMobile = () => {
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isSmallScreen = window.innerWidth < 768;
+      return isTouchDevice || isSmallScreen;
+    };
+
+    setIsMobile(checkMobile());
+
+    // Don't use Lenis on mobile - native scroll is better
+    if (checkMobile()) {
+      return;
+    }
+
+    // Initialize Lenis only on desktop
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      touchMultiplier: 2,
     });
 
     lenisRef.current = lenis;
@@ -31,19 +45,15 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
     lenis.on('scroll', ScrollTrigger.update);
 
     // Add Lenis to GSAP ticker
-    gsap.ticker.add((time) => {
+    const rafCallback = (time: number) => {
       lenis.raf(time * 1000);
-    });
-
-    // Disable GSAP's default lag smoothing
+    };
+    gsap.ticker.add(rafCallback);
     gsap.ticker.lagSmoothing(0);
 
-    // Cleanup
     return () => {
       lenis.destroy();
-      gsap.ticker.remove((time) => {
-        lenis.raf(time * 1000);
-      });
+      gsap.ticker.remove(rafCallback);
     };
   }, []);
 

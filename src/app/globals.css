@@ -119,17 +119,31 @@ img[loading] {
   background-clip: text;
 }
 
-/* Glassmorphism utilities */
+/* Glassmorphism utilities - reduced blur on mobile */
 .glass {
-  background: rgba(9, 9, 11, 0.7);
-  backdrop-filter: blur(20px);
+  background: rgba(9, 9, 11, 0.8);
+  backdrop-filter: blur(8px);
   border: 1px solid rgba(39, 39, 42, 0.5);
 }
 
+@media (min-width: 768px) {
+  .glass {
+    background: rgba(9, 9, 11, 0.7);
+    backdrop-filter: blur(20px);
+  }
+}
+
 .glass-light {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (min-width: 768px) {
+  .glass-light {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+  }
 }
 
 /* Animation utilities */
@@ -183,4 +197,35 @@ img[loading] {
 
 .link-hover:hover::after {
   width: 100%;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Mobile performance optimizations */
+@media (max-width: 767px) {
+  /* Disable expensive backdrop filters */
+  .backdrop-blur-sm,
+  .backdrop-blur,
+  .backdrop-blur-md,
+  .backdrop-blur-lg,
+  .backdrop-blur-xl {
+    backdrop-filter: none !important;
+  }
+  
+  /* Reduce blur on gradient orbs */
+  .blur-\[80px\],
+  .blur-\[100px\],
+  .blur-\[120px\] {
+    filter: blur(30px) !important;
+  }
 }

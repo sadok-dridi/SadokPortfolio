@@ -33,10 +33,19 @@ export default function Header() {
     const header = headerRef.current;
     if (!header) return;
 
+    // Check if loading screen was already shown this session
+    let hasVisited = false;
+    try {
+      hasVisited = sessionStorage.getItem('hasVisited') === 'true';
+    } catch (e) {}
+
+    // If already visited, show header immediately; otherwise wait for loading screen
+    const delay = hasVisited ? 0.1 : 2.8;
+
     gsap.fromTo(
       header,
       { y: -100, opacity: 0 },
-      { y: 0, opacity: 1, duration: 1, ease: 'power3.out', delay: 2.5 }
+      { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay }
     );
   }, []);
 

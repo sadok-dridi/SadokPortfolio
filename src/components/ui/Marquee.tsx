@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, ReactNode } from 'react';
+import { useRef, useEffect, ReactNode, useState } from 'react';
 import { gsap } from 'gsap';
 import { cn } from '@/lib/utils';
 
@@ -26,6 +26,14 @@ export default function Marquee({
   const containerRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const tweenRef = useRef<gsap.core.Tween | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      return 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 768;
+    };
+    setIsMobile(checkMobile());
+  }, []);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -33,13 +41,18 @@ export default function Marquee({
     
     if (!container || !inner) return;
 
-    // Calculate the width of one item set
     const itemWidth = inner.scrollWidth / repeat;
-    
-    // Set up the infinite scroll
     const directionMultiplier = direction === 'left' ? -1 : 1;
     
-    // Create seamless loop
+    // Use CSS animation on mobile for better performance
+    if (isMobile) {
+      const duration = itemWidth / speed;
+      inner.style.animation = `marquee ${duration}s linear infinite`;
+      inner.style.setProperty('--marquee-distance', `${directionMultiplier * itemWidth}px`);
+      return;
+    }
+    
+    // Use GSAP on desktop
     tweenRef.current = gsap.to(inner, {
       x: directionMultiplier * itemWidth,
       duration: itemWidth / speed,
@@ -57,7 +70,7 @@ export default function Marquee({
       },
     });
 
-    // Pause on hover
+    // Pause on hover (desktop only)
     if (pauseOnHover) {
       const handleMouseEnter = () => {
         gsap.to(tweenRef.current, { timeScale: 0, duration: 0.5 });
@@ -80,9 +93,8 @@ export default function Marquee({
     return () => {
       tweenRef.current?.kill();
     };
-  }, [speed, direction, pauseOnHover, repeat]);
+  }, [speed, direction, pauseOnHover, repeat, isMobile]);
 
-  // Create repeated content
   const items = Array(repeat).fill(children);
 
   return (
@@ -90,9 +102,15 @@ export default function Marquee({
       ref={containerRef}
       className={cn('overflow-hidden whitespace-nowrap', className)}
     >
+      <style jsx>{`
+        @keyframes marquee {
+          from { transform: translateX(0); }
+          to { transform: translateX(var(--marquee-distance, -100%)); }
+        }
+      `}</style>
       <div
         ref={innerRef}
-        className="inline-flex"
+        className="inline-flex will-change-transform"
         style={{ gap }}
       >
         {items.map((item, index) => (

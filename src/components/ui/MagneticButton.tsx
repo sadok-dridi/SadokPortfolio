@@ -27,9 +27,20 @@ export default function MagneticButton({
 }: MagneticButtonProps) {
   const buttonRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLSpanElement>(null);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile on mount
+  useEffect(() => {
+    const checkMobile = () => {
+      return 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 768;
+    };
+    setIsMobile(checkMobile());
+  }, []);
 
   useEffect(() => {
+    // Disable magnetic effect on mobile
+    if (isMobile) return;
+
     const button = buttonRef.current;
     const content = contentRef.current;
     
@@ -50,7 +61,6 @@ export default function MagneticButton({
         ease: 'power3.out',
       });
 
-      // Content moves slightly more for depth effect
       gsap.to(content, {
         x: deltaX * 0.3,
         y: deltaY * 0.3,
@@ -60,7 +70,6 @@ export default function MagneticButton({
     };
 
     const handleMouseLeave = () => {
-      setIsHovered(false);
       gsap.to(button, {
         x: 0,
         y: 0,
@@ -75,30 +84,47 @@ export default function MagneticButton({
       });
     };
 
-    const handleMouseEnter = () => {
-      setIsHovered(true);
-    };
-
     button.addEventListener('mousemove', handleMouseMove);
     button.addEventListener('mouseleave', handleMouseLeave);
-    button.addEventListener('mouseenter', handleMouseEnter);
 
     return () => {
       button.removeEventListener('mousemove', handleMouseMove);
       button.removeEventListener('mouseleave', handleMouseLeave);
-      button.removeEventListener('mouseenter', handleMouseEnter);
     };
-  }, [strength]);
+  }, [strength, isMobile]);
 
   const commonProps = {
     ref: buttonRef as React.RefObject<HTMLButtonElement & HTMLAnchorElement & HTMLDivElement>,
     className: cn(
-      'relative inline-flex items-center justify-center overflow-hidden',
+      'relative inline-flex items-center justify-center',
       className
     ),
     'data-cursor': cursorVariant,
     'data-cursor-text': cursorText,
   };
+
+  // On mobile, render without the content wrapper for simplicity
+  if (isMobile) {
+    if (Component === 'a') {
+      return (
+        <a className={cn('relative inline-flex items-center justify-center', className)} href={href}>
+          {children}
+        </a>
+      );
+    }
+    if (Component === 'div') {
+      return (
+        <div className={cn('relative inline-flex items-center justify-center', className)}>
+          {children}
+        </div>
+      );
+    }
+    return (
+      <button className={cn('relative inline-flex items-center justify-center', className)} onClick={onClick} type="button">
+        {children}
+      </button>
+    );
+  }
 
   const content = (
     <span

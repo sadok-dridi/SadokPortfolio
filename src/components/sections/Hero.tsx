@@ -6,38 +6,116 @@ import TextReveal from '@/components/ui/TextReveal';
 import MagneticButton from '@/components/ui/MagneticButton';
 import { TransitionLink } from '@/components/layout/PageTransition';
 
-export default function Hero() {
+interface HeroProps {
+  isLoading?: boolean;
+}
+
+export default function Hero({ isLoading = false }: HeroProps) {
   const containerRef = useRef<HTMLElement>(null);
   const scrollIndicatorRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const hasAnimated = useRef(false);
 
   useEffect(() => {
+    // Don't animate while loading or if already animated
+    if (isLoading || hasAnimated.current) return;
+    
+    hasAnimated.current = true;
+    
+    const container = containerRef.current;
+    const content = contentRef.current;
     const indicator = scrollIndicatorRef.current;
-    if (!indicator) return;
+    
+    if (!container || !content) return;
 
-    // Animate scroll indicator
-    gsap.to(indicator, {
-      y: 10,
-      duration: 1.5,
-      repeat: -1,
-      yoyo: true,
-      ease: 'power2.inOut',
-    });
-  }, []);
+    // Get all animatable elements
+    const badge = content.querySelector('.hero-badge');
+    const heading = content.querySelector('.hero-heading');
+    const subtitle = content.querySelector('.hero-subtitle');
+    const buttons = content.querySelector('.hero-buttons');
+    const stats = content.querySelectorAll('.hero-stat');
+
+    // Create timeline
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+    // Animate elements in sequence
+    if (badge) {
+      tl.fromTo(badge, 
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.6 },
+        0.1
+      );
+    }
+
+    if (heading) {
+      tl.fromTo(heading,
+        { opacity: 0, y: 40 },
+        { opacity: 1, y: 0, duration: 0.8 },
+        0.2
+      );
+    }
+
+    if (subtitle) {
+      tl.fromTo(subtitle,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.7 },
+        0.4
+      );
+    }
+
+    if (buttons) {
+      tl.fromTo(buttons,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.6 },
+        0.6
+      );
+    }
+
+    if (stats.length > 0) {
+      tl.fromTo(stats,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.5, stagger: 0.1 },
+        0.7
+      );
+    }
+
+    // Scroll indicator animation
+    if (indicator) {
+      tl.fromTo(indicator,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.5 },
+        1
+      );
+
+      gsap.to(indicator, {
+        y: 10,
+        duration: 1.5,
+        repeat: -1,
+        yoyo: true,
+        ease: 'power2.inOut',
+        delay: 1.5,
+      });
+    }
+
+    return () => {
+      tl.kill();
+    };
+  }, [isLoading]);
 
   return (
     <section
       ref={containerRef}
       className="relative min-h-[100svh] flex flex-col justify-center px-4 sm:px-6 md:px-12 pt-24 sm:pt-28 md:pt-32 pb-16 sm:pb-20"
     >
-      {/* Background elements */}
+      {/* Background elements - simplified on mobile for performance */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Gradient orbs - smaller on mobile */}
-        <div className="absolute top-1/4 -left-1/4 w-[300px] sm:w-[400px] md:w-[600px] h-[300px] sm:h-[400px] md:h-[600px] bg-cyan-500/10 rounded-full blur-[80px] sm:blur-[100px] md:blur-[120px]" />
-        <div className="absolute bottom-1/4 -right-1/4 w-[300px] sm:w-[400px] md:w-[600px] h-[300px] sm:h-[400px] md:h-[600px] bg-purple-500/10 rounded-full blur-[80px] sm:blur-[100px] md:blur-[120px]" />
+        {/* Gradient orbs - smaller blur on mobile */}
+        <div className="absolute top-1/4 -left-1/4 w-[200px] md:w-[500px] h-[200px] md:h-[500px] bg-cyan-500/10 rounded-full blur-[40px] md:blur-[100px]" />
+        <div className="absolute bottom-1/4 -right-1/4 w-[200px] md:w-[500px] h-[200px] md:h-[500px] bg-purple-500/10 rounded-full blur-[40px] md:blur-[100px]" />
         
-        {/* Grid pattern */}
+        {/* Grid pattern - hidden on mobile */}
         <div 
-          className="absolute inset-0 opacity-[0.02]"
+          className="hidden md:block absolute inset-0 opacity-[0.02]"
           style={{
             backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
                             linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
@@ -46,9 +124,9 @@ export default function Hero() {
         />
       </div>
 
-      <div className="relative z-10 container mx-auto">
+      <div ref={contentRef} className="relative z-10 container mx-auto">
         {/* Status badge */}
-        <div className="mb-6 sm:mb-8 overflow-hidden">
+        <div className="hero-badge mb-6 sm:mb-8 overflow-hidden opacity-0">
           <div className="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -59,34 +137,22 @@ export default function Hero() {
         </div>
 
         {/* Main heading */}
-        <div className="max-w-5xl">
-          <TextReveal
-            as="h1"
-            animation="words"
-            className="text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white tracking-tight"
-            delay={2.6}
-            trigger="load"
-          >
+        <div className="hero-heading max-w-5xl opacity-0">
+          <h1 className="text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white tracking-tight">
             I build digital experiences that make an impact
-          </TextReveal>
+          </h1>
         </div>
 
         {/* Subtitle */}
-        <div className="mt-5 sm:mt-6 md:mt-8 max-w-2xl">
-          <TextReveal
-            as="p"
-            animation="words"
-            className="text-base sm:text-lg md:text-xl text-zinc-400 leading-relaxed"
-            delay={3}
-            trigger="load"
-          >
+        <div className="hero-subtitle mt-5 sm:mt-6 md:mt-8 max-w-2xl opacity-0">
+          <p className="text-base sm:text-lg md:text-xl text-zinc-400 leading-relaxed">
             Full Stack Engineer specializing in modern web applications, 
             cloud infrastructure, and AI-powered solutions.
-          </TextReveal>
+          </p>
         </div>
 
         {/* CTA buttons */}
-        <div className="mt-8 sm:mt-10 md:mt-12 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+        <div className="hero-buttons mt-8 sm:mt-10 md:mt-12 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 opacity-0">
           <TransitionLink href="/work" className="w-full sm:w-auto">
             <MagneticButton
               as="div"
@@ -126,16 +192,10 @@ export default function Hero() {
             { value: '15+', label: 'Happy Clients' },
             { value: '99%', label: 'Client Satisfaction' },
           ].map((stat, index) => (
-            <div key={index} className="text-center md:text-left">
-              <TextReveal
-                as="div"
-                animation="chars"
-                className="text-2xl sm:text-3xl md:text-4xl font-bold text-white"
-                delay={3.2 + index * 0.1}
-                trigger="load"
-              >
+            <div key={index} className="hero-stat text-center md:text-left opacity-0">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
                 {stat.value}
-              </TextReveal>
+              </div>
               <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-500 uppercase tracking-wider">
                 {stat.label}
               </p>
@@ -144,10 +204,10 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Scroll indicator - hidden on very small screens */}
+      {/* Scroll indicator */}
       <div
         ref={scrollIndicatorRef}
-        className="hidden sm:flex absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2"
+        className="hidden sm:flex absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2 opacity-0"
       >
         <span className="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest">Scroll</span>
         <div className="w-5 sm:w-6 h-8 sm:h-10 border-2 border-zinc-700 rounded-full flex justify-center pt-2">

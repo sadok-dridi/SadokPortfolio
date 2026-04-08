@@ -17,12 +17,19 @@ export default function Home() {
     <>
       <LoadingScreen onComplete={() => setIsLoading(false)} />
       
-      <div className={`transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
+      {/* Page content - completely hidden until loading completes */}
+      <div 
+        style={{ 
+          visibility: isLoading ? 'hidden' : 'visible',
+          opacity: isLoading ? 0 : 1,
+          transition: 'opacity 0.3s ease-out',
+        }}
+      >
         <Header />
         
         <main>
           {/* Hero Section */}
-          <Hero />
+          <Hero isLoading={isLoading} />
 
           {/* Marquee Banner */}
           <div className="py-8 border-y border-zinc-800/50 overflow-hidden bg-zinc-900/30">
