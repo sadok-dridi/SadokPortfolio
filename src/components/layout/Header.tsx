@@ -95,12 +95,12 @@ export default function Header() {
 
   return (
     <>
-      <header
-        ref={headerRef}
-        className={cn(
-          'fixed top-0 left-0 right-0 z-[100] transition-all duration-500',
+        <header
+          ref={headerRef}
+          className={cn(
+          'fixed top-0 left-0 right-0 z-[100] isolate transition-all duration-500',
           isScrolled 
-            ? 'py-3 md:py-4 bg-zinc-950/80 backdrop-blur-lg border-b border-zinc-800/50' 
+            ? 'py-3 md:py-4 bg-zinc-950/80 backdrop-blur-lg after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-zinc-800/40' 
             : 'py-4 md:py-6'
         )}
       >

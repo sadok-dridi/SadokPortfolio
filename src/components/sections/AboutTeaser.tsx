@@ -31,7 +31,7 @@ export default function AboutTeaser() {
     if (!section || !image || !skillsContainer) return;
 
     // Parallax effect on image
-    gsap.to(image, {
+    const imageAnimation = gsap.to(image, {
       y: -50,
       ease: 'none',
       scrollTrigger: {
@@ -44,9 +44,9 @@ export default function AboutTeaser() {
 
     // Animate skill bars
     const bars = skillsContainer.querySelectorAll('.skill-bar');
-    bars.forEach((bar) => {
+    const barAnimations = Array.from(bars).map((bar) => {
       const width = bar.getAttribute('data-width');
-      gsap.fromTo(
+      return gsap.fromTo(
         bar,
         { width: '0%' },
         {
@@ -56,13 +56,15 @@ export default function AboutTeaser() {
           scrollTrigger: {
             trigger: bar,
             start: 'top 90%',
+            toggleActions: 'restart none none reset',
           },
         }
       );
     });
 
     return () => {
-      ScrollTrigger.getAll().forEach(st => st.kill());
+      imageAnimation.scrollTrigger?.kill();
+      barAnimations.forEach((animation) => animation.scrollTrigger?.kill());
     };
   }, []);
 

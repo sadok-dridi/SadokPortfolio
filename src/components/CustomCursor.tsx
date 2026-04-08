@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { gsap } from 'gsap';
-import { lerp } from '@/lib/utils';
 
 interface CursorState {
   isHovering: boolean;
@@ -14,12 +12,11 @@ interface CursorState {
 export default function CustomCursor() {
   const cursorRef = useRef<HTMLDivElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
-  const cursorTextRef = useRef<HTMLDivElement>(null);
-  const [isTouchDevice, setIsTouchDevice] = useState(true); // Default to true to prevent flash
+  const [isVisible, setIsVisible] = useState(false);
   
-  const mousePos = useRef({ x: 0, y: 0 });
-  const cursorPos = useRef({ x: 0, y: 0 });
-  const dotPos = useRef({ x: 0, y: 0 });
+  const mousePos = useRef({ x: -100, y: -100 });
+  const cursorPos = useRef({ x: -100, y: -100 });
+  const dotPos = useRef({ x: -100, y: -100 });
   
   const [cursorState, setCursorState] = useState<CursorState>({
     isHovering: false,
@@ -28,23 +25,27 @@ export default function CustomCursor() {
     variant: 'default',
   });
 
-  // Check for touch device on mount
+  // Check if we should show custom cursor (desktop only, no touch)
   useEffect(() => {
-    const checkTouchDevice = () => {
-      const isTouchCapable = 
-        'ontouchstart' in window ||
-        navigator.maxTouchPoints > 0 ||
-        window.matchMedia('(pointer: coarse)').matches;
-      
-      setIsTouchDevice(isTouchCapable);
-    };
-
-    checkTouchDevice();
+    // Only show on devices with fine pointer (mouse)
+    const hasFineMouse = window.matchMedia('(pointer: fine)').matches;
+    const isLargeScreen = window.innerWidth >= 768;
     
-    // Also check on resize (for devices that can switch modes)
-    window.addEventListener('resize', checkTouchDevice);
-    return () => window.removeEventListener('resize', checkTouchDevice);
+    if (hasFineMouse && isLargeScreen) {
+      setIsVisible(true);
+      // Hide default cursor
+      document.body.style.cursor = 'none';
+    }
+
+    return () => {
+      document.body.style.cursor = '';
+    };
   }, []);
+
+  // Linear interpolation helper
+  const lerp = (start: number, end: number, factor: number) => {
+    return start + (end - start) * factor;
+  };
 
   // Handle mouse movement
   const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -82,7 +83,6 @@ export default function CustomCursor() {
       target.tagName === 'BUTTON' ||
       target.closest('a') ||
       target.closest('button') ||
-      target.style.cursor === 'pointer' ||
       window.getComputedStyle(target).cursor === 'pointer'
     ) {
       setCursorState(prev => ({
@@ -103,7 +103,7 @@ export default function CustomCursor() {
 
   // Animation loop
   useEffect(() => {
-    if (isTouchDevice) return;
+    if (!isVisible) return;
     
     let animationId: number;
     
@@ -113,15 +113,17 @@ export default function CustomCursor() {
       cursorPos.current.y = lerp(cursorPos.current.y, mousePos.current.y, 0.15);
       
       // Faster follow for dot
-      dotPos.current.x = lerp(dotPos.current.x, mousePos.current.x, 0.35);
-      dotPos.current.y = lerp(dotPos.current.y, mousePos.current.y, 0.35);
+      dotPos.current.x = lerp(dotPos.current.x, mousePos.current.x, 0.4);
+      dotPos.current.y = lerp(dotPos.current.y, mousePos.current.y, 0.4);
       
       if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate(${cursorPos.current.x}px, ${cursorPos.current.y}px)`;
+        cursorRef.current.style.left = `${cursorPos.current.x}px`;
+        cursorRef.current.style.top = `${cursorPos.current.y}px`;
       }
       
       if (cursorDotRef.current) {
-        cursorDotRef.current.style.transform = `translate(${dotPos.current.x}px, ${dotPos.current.y}px)`;
+        cursorDotRef.current.style.left = `${dotPos.current.x}px`;
+        cursorDotRef.current.style.top = `${dotPos.current.y}px`;
       }
       
       animationId = requestAnimationFrame(animate);
@@ -130,11 +132,11 @@ export default function CustomCursor() {
     animate();
     
     return () => cancelAnimationFrame(animationId);
-  }, [isTouchDevice]);
+  }, [isVisible]);
 
   // Event listeners
   useEffect(() => {
-    if (isTouchDevice) return;
+    if (!isVisible) return;
     
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mousemove', handleElementHover);
@@ -147,65 +149,42 @@ export default function CustomCursor() {
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [handleMouseMove, handleElementHover, handleMouseDown, handleMouseUp, isTouchDevice]);
+  }, [handleMouseMove, handleElementHover, handleMouseDown, handleMouseUp, isVisible]);
 
-  // Animate cursor state changes
-  useEffect(() => {
-    if (isTouchDevice || !cursorRef.current) return;
-    
-    const cursor = cursorRef.current;
-    
-    if (cursorState.isHovering) {
-      gsap.to(cursor, {
-        scale: cursorState.variant === 'large' ? 2.5 : 1.5,
-        duration: 0.3,
-        ease: 'power3.out',
-      });
-    } else {
-      gsap.to(cursor, {
-        scale: 1,
-        duration: 0.3,
-        ease: 'power3.out',
-      });
-    }
-    
-    if (cursorState.isClicking) {
-      gsap.to(cursor, {
-        scale: 0.8,
-        duration: 0.1,
-        ease: 'power3.out',
-      });
-    }
-  }, [cursorState.isHovering, cursorState.isClicking, cursorState.variant, isTouchDevice]);
-
-  // Don't render on touch devices
-  if (isTouchDevice) {
+  // Don't render if not visible
+  if (!isVisible) {
     return null;
   }
+
+  // Calculate cursor size based on state
+  const getCursorSize = () => {
+    if (cursorState.isClicking) return 'w-6 h-6';
+    if (cursorState.variant === 'text') return 'w-20 h-20';
+    if (cursorState.variant === 'large') return 'w-24 h-24';
+    if (cursorState.isHovering) return 'w-14 h-14';
+    return 'w-10 h-10';
+  };
 
   return (
     <>
       {/* Main cursor ring */}
       <div
         ref={cursorRef}
-        className="fixed top-0 left-0 pointer-events-none z-[9999] mix-blend-difference hidden md:block"
-        style={{ transform: 'translate(-50%, -50%)' }}
+        className="fixed pointer-events-none z-[9998] -translate-x-1/2 -translate-y-1/2 mix-blend-difference"
+        style={{ left: -100, top: -100 }}
       >
         <div
           className={`
-            w-10 h-10 rounded-full border-2 border-white
+            rounded-full border-2 border-white
             flex items-center justify-center
-            transition-[width,height,background] duration-300 ease-out
-            ${cursorState.variant === 'text' ? 'w-24 h-24 bg-white' : ''}
-            ${cursorState.variant === 'hidden' ? 'opacity-0' : ''}
-            ${cursorState.variant === 'large' ? 'w-32 h-32' : ''}
+            transition-all duration-200 ease-out
+            ${getCursorSize()}
+            ${cursorState.variant === 'text' ? 'bg-white' : 'bg-transparent'}
+            ${cursorState.variant === 'hidden' ? 'opacity-0 scale-0' : 'opacity-100 scale-100'}
           `}
         >
           {cursorState.text && (
-            <span
-              ref={cursorTextRef}
-              className="text-black text-xs font-medium uppercase tracking-wider"
-            >
+            <span className="text-black text-[10px] font-medium uppercase tracking-wider">
               {cursorState.text}
             </span>
           )}
@@ -216,13 +195,14 @@ export default function CustomCursor() {
       <div
         ref={cursorDotRef}
         className={`
-          fixed top-0 left-0 w-1.5 h-1.5 bg-white rounded-full
-          pointer-events-none z-[9999] mix-blend-difference hidden md:block
-          transition-opacity duration-300
-          ${cursorState.variant === 'text' || cursorState.variant === 'hidden' ? 'opacity-0' : 'opacity-100'}
+          fixed w-1 h-1 bg-white rounded-full
+          pointer-events-none z-[9998] -translate-x-1/2 -translate-y-1/2 mix-blend-difference
+          transition-opacity duration-200
+          ${cursorState.variant === 'text' || cursorState.variant === 'hidden' || cursorState.isHovering ? 'opacity-0' : 'opacity-100'}
         `}
-        style={{ transform: 'translate(-50%, -50%)' }}
+        style={{ left: -100, top: -100 }}
       />
+      
     </>
   );
 }

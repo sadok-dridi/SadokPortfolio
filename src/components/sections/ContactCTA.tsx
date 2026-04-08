@@ -21,7 +21,7 @@ export default function ContactCTA() {
     if (!section || !heading) return;
 
     // Scale up heading on scroll
-    gsap.fromTo(
+    const animation = gsap.fromTo(
       heading,
       { scale: 0.8, opacity: 0 },
       {
@@ -32,9 +32,14 @@ export default function ContactCTA() {
         scrollTrigger: {
           trigger: section,
           start: 'top 70%',
+          toggleActions: 'restart none none reset',
         },
       }
     );
+
+    return () => {
+      animation.scrollTrigger?.kill();
+    };
   }, []);
 
   return (

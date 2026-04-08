@@ -1,11 +1,14 @@
 'use client';
 
-import { useEffect, useRef, ReactNode, useState } from 'react';
+import { useEffect, useRef, ReactNode } from 'react';
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-gsap.registerPlugin(ScrollTrigger);
+// Register ScrollTrigger plugin
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 interface SmoothScrollProps {
   children: ReactNode;
@@ -13,49 +16,78 @@ interface SmoothScrollProps {
 
 export default function SmoothScroll({ children }: SmoothScrollProps) {
   const lenisRef = useRef<Lenis | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Check if mobile/touch device
-    const checkMobile = () => {
-      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      const isSmallScreen = window.innerWidth < 768;
-      return isTouchDevice || isSmallScreen;
-    };
+    // Check if we should use smooth scroll (desktop with mouse only)
+    const hasFineMouse = window.matchMedia('(pointer: fine)').matches;
+    const isLargeScreen = window.innerWidth >= 768;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    setIsMobile(checkMobile());
-
-    // Don't use Lenis on mobile - native scroll is better
-    if (checkMobile()) {
+    // Don't use Lenis on mobile/touch or if user prefers reduced motion
+    if (!hasFineMouse || !isLargeScreen || prefersReducedMotion) {
+      // Still need to initialize ScrollTrigger for animations
+      ScrollTrigger.defaults({
+        markers: false,
+      });
       return;
     }
 
-    // Initialize Lenis only on desktop
+    // Initialize Lenis for smooth scrolling on desktop
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 1.0,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
+      touchMultiplier: 2,
+      infinite: false,
     });
 
     lenisRef.current = lenis;
 
-    // Connect Lenis to GSAP ScrollTrigger
+    // Connect Lenis to ScrollTrigger
     lenis.on('scroll', ScrollTrigger.update);
 
-    // Add Lenis to GSAP ticker
-    const rafCallback = (time: number) => {
+    // Use GSAP ticker to run Lenis
+    gsap.ticker.add((time) => {
       lenis.raf(time * 1000);
-    };
-    gsap.ticker.add(rafCallback);
+    });
+
+    // Disable GSAP's lag smoothing to keep in sync
     gsap.ticker.lagSmoothing(0);
 
+    // Handle anchor links
+    const handleAnchorClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest('a[href^="#"]');
+      if (anchor) {
+        const href = anchor.getAttribute('href');
+        if (href && href !== '#') {
+          e.preventDefault();
+          const targetElement = document.querySelector(href);
+          if (targetElement) {
+            lenis.scrollTo(targetElement as HTMLElement, {
+              offset: -100,
+              duration: 1.2,
+            });
+          }
+        }
+      }
+    };
+
+    document.addEventListener('click', handleAnchorClick);
+
     return () => {
+      document.removeEventListener('click', handleAnchorClick);
       lenis.destroy();
-      gsap.ticker.remove(rafCallback);
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
 
   return <>{children}</>;
+}
+
+// Export a hook to access Lenis instance if needed
+export function useLenis() {
+  return null; // Could be enhanced to provide actual instance via context
 }

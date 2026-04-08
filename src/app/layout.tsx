@@ -39,8 +39,8 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-zinc-950 text-white">
         <SmoothScroll>
+          <CustomCursor />
           <PageTransitionProvider>
-            <CustomCursor />
             {children}
           </PageTransitionProvider>
         </SmoothScroll>

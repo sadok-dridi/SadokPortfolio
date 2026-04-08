@@ -26,7 +26,7 @@ export default function FeaturedWork() {
     // Animate projects on scroll
     const projectCards = projectsContainer.querySelectorAll('.project-card');
     
-    projectCards.forEach((card, index) => {
+    const animations = Array.from(projectCards).map((card) =>
       gsap.fromTo(
         card,
         { y: 100, opacity: 0 },
@@ -38,13 +38,14 @@ export default function FeaturedWork() {
           scrollTrigger: {
             trigger: card,
             start: 'top 85%',
+            toggleActions: 'restart none none reset',
           },
         }
-      );
-    });
+      )
+    );
 
     return () => {
-      ScrollTrigger.getAll().forEach(st => st.kill());
+      animations.forEach((animation) => animation.scrollTrigger?.kill());
     };
   }, []);
 

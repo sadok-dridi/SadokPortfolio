@@ -30,7 +30,7 @@ export default function TextReveal({
   stagger = 0.05,
   trigger = 'scroll',
   threshold = 'top 85%',
-  once = true,
+  once = false,
 }: TextRevealProps) {
   const containerRef = useRef<HTMLElement>(null);
   const hasAnimated = useRef(false);
@@ -99,24 +99,36 @@ export default function TextReveal({
       }
     };
 
+    const reset = () => {
+      if (animation === 'fade') {
+        gsap.set(innerSpans, { opacity: 0 });
+      } else {
+        gsap.set(innerSpans, { y: '100%', opacity: 0 });
+      }
+
+      if (!once) {
+        hasAnimated.current = false;
+      }
+    };
+
     if (trigger === 'load') {
       animateIn();
     } else {
-      ScrollTrigger.create({
+      const triggerInstance = ScrollTrigger.create({
         trigger: container,
         start: threshold,
         onEnter: animateIn,
+        onEnterBack: animateIn,
+        onLeaveBack: reset,
         once,
       });
+
+      return () => {
+        triggerInstance.kill();
+      };
     }
 
-    return () => {
-      ScrollTrigger.getAll().forEach(st => {
-        if (st.vars.trigger === container) {
-          st.kill();
-        }
-      });
-    };
+    return;
   }, [animation, delay, duration, stagger, trigger, threshold, once]);
 
   return (
