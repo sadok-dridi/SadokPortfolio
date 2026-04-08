@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 
 interface LoadingScreenProps {
@@ -9,265 +9,257 @@ interface LoadingScreenProps {
 
 export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const progressRef = useRef<HTMLDivElement>(null);
-  const counterRef = useRef<HTMLSpanElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(true);
-  const [progress, setProgress] = useState(0);
-  const hasCompletedRef = useRef(false);
-  const animationRef = useRef<gsap.core.Tween | null>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const percentRef = useRef<HTMLSpanElement>(null);
+  const logoRef = useRef<HTMLDivElement>(null);
+  const [isHidden, setIsHidden] = useState(false);
+  const progressRef = useRef(0);
+  const targetProgressRef = useRef(0);
+  const rafRef = useRef<number | null>(null);
+  const isCompleteRef = useRef(false);
 
-  // Complete handler
-  const handleComplete = useCallback(() => {
-    if (hasCompletedRef.current) return;
-    hasCompletedRef.current = true;
-
-    const container = containerRef.current;
-    if (!container) {
-      setIsVisible(false);
-      document.body.style.overflow = '';
-      onComplete?.();
-      return;
-    }
-
-    // Exit animation
-    gsap.to(container, {
-      yPercent: -100,
-      duration: 0.8,
-      ease: 'power4.inOut',
-      onComplete: () => {
-        setIsVisible(false);
-        document.body.style.overflow = '';
+  useEffect(() => {
+    // Skip if already visited this session
+    try {
+      if (sessionStorage.getItem('hasVisited') === 'true') {
+        setIsHidden(true);
         onComplete?.();
-      },
-    });
-
-    // Save to session storage
-    try {
-      sessionStorage.setItem('hasVisited', 'true');
-    } catch (e) {
-      // Ignore
-    }
-  }, [onComplete]);
-
-  // Update progress bar animation
-  useEffect(() => {
-    const progressBar = progressRef.current;
-    const counter = counterRef.current;
-
-    if (!progressBar || !counter) return;
-
-    // Kill previous animation
-    animationRef.current?.kill();
-
-    // Animate to current progress
-    animationRef.current = gsap.to(progressBar, {
-      scaleX: progress / 100,
-      duration: 0.3,
-      ease: 'power2.out',
-      onUpdate: function() {
-        const currentScale = gsap.getProperty(progressBar, 'scaleX') as number;
-        counter.textContent = Math.round(currentScale * 100).toString().padStart(3, '0');
-      }
-    });
-  }, [progress]);
-
-  // Main loading logic
-  useEffect(() => {
-    // Check if already visited
-    let hasVisited = false;
-    try {
-      hasVisited = sessionStorage.getItem('hasVisited') === 'true';
-    } catch (e) {
-      // Ignore
-    }
-
-    if (hasVisited) {
-      setIsVisible(false);
-      onComplete?.();
-      return;
-    }
-
-    // Lock scroll
-    document.body.style.overflow = 'hidden';
-
-    // Track loading progress
-    let loadedItems = 0;
-    let totalItems = 0;
-
-    const updateProgress = () => {
-      if (totalItems === 0) {
-        setProgress(0);
         return;
       }
-      const newProgress = Math.min(Math.round((loadedItems / totalItems) * 100), 100);
-      setProgress(newProgress);
+    } catch (e) {}
 
-      if (newProgress >= 100) {
-        // Small delay to show 100% before exit animation
-        setTimeout(() => {
-          handleComplete();
-        }, 300);
-      }
-    };
+    // Lock body scroll
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.overflow = 'hidden';
 
-    // 1. Track document ready state
-    totalItems++;
-    if (document.readyState === 'complete') {
-      loadedItems++;
-    } else {
-      window.addEventListener('load', () => {
-        loadedItems++;
-        updateProgress();
-      }, { once: true });
-    }
-
-    // 2. Track fonts
-    totalItems++;
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => {
-        loadedItems++;
-        updateProgress();
-      }).catch(() => {
-        loadedItems++;
-        updateProgress();
-      });
-    } else {
-      // Fonts API not supported, mark as loaded
-      loadedItems++;
-    }
-
-    // 3. Track images in viewport
-    const images = document.querySelectorAll('img');
-    images.forEach((img) => {
-      // Only track images that might be visible initially
-      const rect = img.getBoundingClientRect();
-      const isInViewport = rect.top < window.innerHeight * 2; // First 2 screens
-      
-      if (isInViewport) {
-        totalItems++;
-        if (img.complete && img.naturalHeight !== 0) {
-          loadedItems++;
-        } else {
-          img.addEventListener('load', () => {
-            loadedItems++;
-            updateProgress();
-          }, { once: true });
-          img.addEventListener('error', () => {
-            loadedItems++;
-            updateProgress();
-          }, { once: true });
-        }
-      }
-    });
-
-    // 4. Minimum loading time for branding (1 second)
-    totalItems++;
-    setTimeout(() => {
-      loadedItems++;
-      updateProgress();
-    }, 1000);
-
-    // Initial progress update
-    updateProgress();
-
-    // Fallback: max 5 seconds
-    const maxTimeout = setTimeout(() => {
-      if (!hasCompletedRef.current) {
-        setProgress(100);
-        setTimeout(handleComplete, 100);
-      }
-    }, 5000);
-
-    // Animate text on mount
-    const text = textRef.current;
-    if (text) {
-      const chars = text.querySelectorAll('.char');
+    // Animate logo in
+    if (logoRef.current) {
       gsap.fromTo(
-        chars,
-        { y: 100, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          stagger: 0.05,
-          ease: 'power3.out',
-        }
+        logoRef.current,
+        { opacity: 0, scale: 0.8 },
+        { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out' }
       );
     }
 
+    // Progress tracking
+    let resourcesLoaded = 0;
+    let totalResources = 0;
+    const minLoadTime = 1200; // Minimum time to show loading
+    const startTime = Date.now();
+    let minTimeReached = false;
+
+    const calculateProgress = () => {
+      // Base progress from resources (0-90%)
+      let resourceProgress = totalResources > 0 
+        ? (resourcesLoaded / totalResources) * 90 
+        : 0;
+      
+      // Time-based progress boost (ensures smooth progression)
+      const elapsed = Date.now() - startTime;
+      const timeProgress = Math.min((elapsed / minLoadTime) * 50, 50);
+      
+      // Combine: take the higher of the two, max 90% until fully ready
+      targetProgressRef.current = Math.min(Math.max(resourceProgress, timeProgress), 90);
+      
+      // If everything is loaded AND min time passed, go to 100%
+      if (resourcesLoaded >= totalResources && minTimeReached) {
+        targetProgressRef.current = 100;
+      }
+    };
+
+    const onResourceLoad = () => {
+      resourcesLoaded++;
+      calculateProgress();
+    };
+
+    // Track document ready state
+    totalResources++;
+    if (document.readyState === 'complete') {
+      resourcesLoaded++;
+    } else {
+      window.addEventListener('load', onResourceLoad, { once: true });
+    }
+
+    // Track fonts
+    totalResources++;
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(onResourceLoad).catch(onResourceLoad);
+    } else {
+      resourcesLoaded++;
+    }
+
+    // Track visible images
+    const images = Array.from(document.images);
+    images.forEach((img) => {
+      if (img.complete) return;
+      totalResources++;
+      img.addEventListener('load', onResourceLoad, { once: true });
+      img.addEventListener('error', onResourceLoad, { once: true });
+    });
+
+    // Initial calculation
+    calculateProgress();
+
+    // Minimum time timer
+    setTimeout(() => {
+      minTimeReached = true;
+      calculateProgress();
+    }, minLoadTime);
+
+    // Smooth progress animation loop
+    const animateProgress = () => {
+      if (isCompleteRef.current) return;
+
+      const current = progressRef.current;
+      const target = targetProgressRef.current;
+      
+      // Smoothly interpolate towards target
+      const newProgress = current + (target - current) * 0.08;
+      progressRef.current = newProgress;
+
+      // Update DOM
+      if (progressBarRef.current) {
+        progressBarRef.current.style.transform = `scaleX(${newProgress / 100})`;
+      }
+      if (percentRef.current) {
+        percentRef.current.textContent = Math.round(newProgress).toString();
+      }
+
+      // Check if complete
+      if (newProgress >= 99.5 && target >= 100) {
+        isCompleteRef.current = true;
+        progressRef.current = 100;
+        
+        if (progressBarRef.current) {
+          progressBarRef.current.style.transform = 'scaleX(1)';
+        }
+        if (percentRef.current) {
+          percentRef.current.textContent = '100';
+        }
+
+        // Trigger exit animation
+        setTimeout(exitAnimation, 300);
+        return;
+      }
+
+      rafRef.current = requestAnimationFrame(animateProgress);
+    };
+
+    const exitAnimation = () => {
+      const container = containerRef.current;
+      if (!container) {
+        finishLoading();
+        return;
+      }
+
+      // Animate out
+      gsap.to(container, {
+        opacity: 0,
+        duration: 0.5,
+        ease: 'power2.inOut',
+        onComplete: finishLoading,
+      });
+    };
+
+    const finishLoading = () => {
+      // Restore scroll
+      const scrollY = document.body.style.top;
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.overflow = '';
+      window.scrollTo(0, parseInt(scrollY || '0') * -1);
+
+      setIsHidden(true);
+      onComplete?.();
+
+      try {
+        sessionStorage.setItem('hasVisited', 'true');
+      } catch (e) {}
+    };
+
+    // Start animation loop
+    rafRef.current = requestAnimationFrame(animateProgress);
+
+    // Failsafe: force complete after 6 seconds
+    const failsafe = setTimeout(() => {
+      if (!isCompleteRef.current) {
+        targetProgressRef.current = 100;
+        minTimeReached = true;
+      }
+    }, 6000);
+
     return () => {
-      clearTimeout(maxTimeout);
-      animationRef.current?.kill();
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      clearTimeout(failsafe);
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
       document.body.style.overflow = '';
     };
-  }, [onComplete, handleComplete]);
+  }, [onComplete]);
 
-  if (!isVisible) return null;
-
-  const name = 'SADOK';
-  const chars = name.split('');
+  if (isHidden) return null;
 
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-[9998] bg-zinc-950 flex flex-col items-center justify-center"
+      className="fixed inset-0 z-[9999] bg-zinc-950 flex items-center justify-center"
+      style={{ touchAction: 'none' }}
     >
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 1px)`,
-            backgroundSize: '40px 40px',
-          }}
-        />
-      </div>
+      {/* Background grid */}
+      <div 
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 1px)',
+          backgroundSize: '32px 32px',
+        }}
+      />
 
-      {/* Main content */}
-      <div className="relative z-10 flex flex-col items-center gap-8 md:gap-12 px-4">
-        {/* Name reveal */}
-        <div ref={textRef} className="overflow-hidden">
-          <div className="flex">
-            {chars.map((char, i) => (
-              <span
-                key={i}
-                className="char inline-block text-5xl sm:text-6xl md:text-7xl lg:text-9xl font-bold text-white tracking-tight"
-              >
-                {char}
-              </span>
-            ))}
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center">
+        {/* Logo */}
+        <div ref={logoRef} className="mb-12">
+          <div className="text-5xl sm:text-6xl md:text-7xl font-bold text-white tracking-tight">
+            SADOK<span className="text-cyan-500">.</span>
           </div>
         </div>
 
-        {/* Progress section */}
-        <div className="flex flex-col items-center gap-3 md:gap-4 w-48 sm:w-56 md:w-64">
-          {/* Progress bar */}
-          <div className="w-full h-[2px] bg-zinc-800 overflow-hidden rounded-full">
+        {/* Progress container */}
+        <div className="w-64 sm:w-72 md:w-80">
+          {/* Progress bar background */}
+          <div className="h-[3px] bg-zinc-800 rounded-full overflow-hidden">
+            {/* Progress bar fill */}
             <div
-              ref={progressRef}
-              className="h-full bg-gradient-to-r from-cyan-500 to-purple-500 origin-left"
+              ref={progressBarRef}
+              className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 origin-left transition-none"
               style={{ transform: 'scaleX(0)' }}
             />
           </div>
 
-          {/* Counter */}
-          <div className="flex items-center gap-2 text-zinc-500">
-            <span className="text-xs sm:text-sm uppercase tracking-widest">Loading</span>
-            <span ref={counterRef} className="font-mono text-base sm:text-lg text-white">
-              000
-            </span>
-            <span className="text-xs sm:text-sm">%</span>
+          {/* Percentage */}
+          <div className="mt-4 flex justify-between items-center text-sm">
+            <span className="text-zinc-500 uppercase tracking-widest text-xs">Loading</span>
+            <div className="text-white font-mono">
+              <span ref={percentRef}>0</span>
+              <span className="text-zinc-500">%</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Corner decorations */}
-      <div className="absolute top-4 left-4 sm:top-8 sm:left-8 text-zinc-600 text-[10px] sm:text-xs font-mono">
-        <div>PORTFOLIO 2026</div>
+      {/* Corner text */}
+      <div className="absolute bottom-6 left-6 sm:bottom-8 sm:left-8 text-zinc-700 text-[10px] sm:text-xs font-mono uppercase tracking-wider">
+        Portfolio 2026
       </div>
-      <div className="absolute bottom-4 right-4 sm:bottom-8 sm:right-8 text-zinc-600 text-[10px] sm:text-xs font-mono">
-        <div>FULL STACK ENGINEER</div>
+      <div className="absolute bottom-6 right-6 sm:bottom-8 sm:right-8 text-zinc-700 text-[10px] sm:text-xs font-mono uppercase tracking-wider">
+        Full Stack Engineer
       </div>
     </div>
   );
