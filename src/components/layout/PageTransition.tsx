@@ -23,6 +23,7 @@ interface PageTransitionProps {
 export function PageTransitionProvider({ children }: PageTransitionProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const hasMountedRef = useRef(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const pathname = usePathname();
 
@@ -30,6 +31,12 @@ export function PageTransitionProvider({ children }: PageTransitionProps) {
   useEffect(() => {
     const content = contentRef.current;
     if (!content) return;
+
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      gsap.set(content, { opacity: 1, y: 0 });
+      return;
+    }
 
     gsap.fromTo(
       content,

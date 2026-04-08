@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import LoadingScreen from '@/components/LoadingScreen';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -14,41 +14,25 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [showContent, setShowContent] = useState(false);
 
-  // Check if we should skip loading on mount
   useEffect(() => {
-    let skipLoading = false;
-    try {
-      skipLoading = sessionStorage.getItem('hasVisited') === 'true';
-    } catch {
-      // sessionStorage not available
+    if (!isLoading) {
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
     }
-    
-    if (skipLoading) {
-      setIsLoading(false);
-      setShowContent(true);
-    }
-  }, []);
+  }, [isLoading]);
 
   const handleLoadingComplete = () => {
     setIsLoading(false);
-    // Small delay before showing content for smooth transition
-    setTimeout(() => {
-      setShowContent(true);
-    }, 100);
+    setShowContent(true);
   };
 
   return (
     <>
       <LoadingScreen onComplete={handleLoadingComplete} />
-      
-      {/* Page content - completely hidden until loading completes */}
-      <div 
-        className={`transition-opacity duration-500 ease-out ${
-          showContent ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-        style={{ 
-          visibility: showContent ? 'visible' : 'hidden',
-        }}
+
+      <div
+        className={showContent ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+        style={{ animation: showContent ? 'fadeIn 0.5s ease-out' : undefined }}
       >
         <Header />
         
