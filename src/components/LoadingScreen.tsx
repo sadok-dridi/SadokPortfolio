@@ -14,9 +14,8 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
   const logoRef = useRef<HTMLDivElement>(null);
   const [isHidden, setIsHidden] = useState(false);
   const progressRef = useRef(0);
-  const targetProgressRef = useRef(0);
-  const rafRef = useRef<number | null>(null);
   const isCompleteRef = useRef(false);
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     // Skip if already visited this session
@@ -40,40 +39,30 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
     if (logoRef.current) {
       gsap.fromTo(
         logoRef.current,
-        { opacity: 0, scale: 0.8 },
-        { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out' }
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }
       );
     }
 
-    // Progress tracking
+    // Loading configuration
+    const MINIMUM_DURATION = 2500; // 2.5 seconds minimum
+    const startTime = Date.now();
+    
+    // Track resources
     let resourcesLoaded = 0;
     let totalResources = 0;
-    const minLoadTime = 1200; // Minimum time to show loading
-    const startTime = Date.now();
-    let minTimeReached = false;
+    let allResourcesReady = false;
 
-    const calculateProgress = () => {
-      // Base progress from resources (0-90%)
-      let resourceProgress = totalResources > 0 
-        ? (resourcesLoaded / totalResources) * 90 
-        : 0;
-      
-      // Time-based progress boost (ensures smooth progression)
-      const elapsed = Date.now() - startTime;
-      const timeProgress = Math.min((elapsed / minLoadTime) * 50, 50);
-      
-      // Combine: take the higher of the two, max 90% until fully ready
-      targetProgressRef.current = Math.min(Math.max(resourceProgress, timeProgress), 90);
-      
-      // If everything is loaded AND min time passed, go to 100%
-      if (resourcesLoaded >= totalResources && minTimeReached) {
-        targetProgressRef.current = 100;
-      }
+    const checkResourceProgress = () => {
+      if (totalResources === 0) return 0;
+      return resourcesLoaded / totalResources;
     };
 
     const onResourceLoad = () => {
       resourcesLoaded++;
-      calculateProgress();
+      if (resourcesLoaded >= totalResources) {
+        allResourcesReady = true;
+      }
     };
 
     // Track document ready state
@@ -92,33 +81,54 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
       resourcesLoaded++;
     }
 
-    // Track visible images
+    // Track images
     const images = Array.from(document.images);
     images.forEach((img) => {
-      if (img.complete) return;
-      totalResources++;
-      img.addEventListener('load', onResourceLoad, { once: true });
-      img.addEventListener('error', onResourceLoad, { once: true });
+      if (!img.complete) {
+        totalResources++;
+        img.addEventListener('load', onResourceLoad, { once: true });
+        img.addEventListener('error', onResourceLoad, { once: true });
+      }
     });
 
-    // Initial calculation
-    calculateProgress();
+    // Check initial state
+    if (resourcesLoaded >= totalResources) {
+      allResourcesReady = true;
+    }
 
-    // Minimum time timer
-    setTimeout(() => {
-      minTimeReached = true;
-      calculateProgress();
-    }, minLoadTime);
-
-    // Smooth progress animation loop
-    const animateProgress = () => {
+    // Animation loop
+    const animate = () => {
       if (isCompleteRef.current) return;
 
-      const current = progressRef.current;
-      const target = targetProgressRef.current;
+      const elapsed = Date.now() - startTime;
+      const resourceProgress = checkResourceProgress();
       
-      // Smoothly interpolate towards target
-      const newProgress = current + (target - current) * 0.08;
+      // Calculate target progress
+      // Phase 1 (0-70%): Time-based, takes ~1.5 seconds
+      // Phase 2 (70-90%): Slower, waits for resources
+      // Phase 3 (90-100%): Only when everything ready
+      
+      let targetProgress: number;
+      
+      if (elapsed < 1500) {
+        // First 1.5s: go from 0 to 70% smoothly
+        targetProgress = (elapsed / 1500) * 70;
+      } else if (elapsed < MINIMUM_DURATION) {
+        // Next 1s: go from 70 to 90% slowly
+        const phase2Progress = (elapsed - 1500) / (MINIMUM_DURATION - 1500);
+        targetProgress = 70 + (phase2Progress * 20);
+      } else if (allResourcesReady) {
+        // After minimum time + resources ready: complete
+        targetProgress = 100;
+      } else {
+        // Waiting for resources, stay at 90%
+        targetProgress = 90 + (resourceProgress * 10);
+      }
+
+      // Smooth interpolation
+      const current = progressRef.current;
+      const diff = targetProgress - current;
+      const newProgress = current + diff * 0.06; // Smooth easing
       progressRef.current = newProgress;
 
       // Update DOM
@@ -129,11 +139,11 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
         percentRef.current.textContent = Math.round(newProgress).toString();
       }
 
-      // Check if complete
-      if (newProgress >= 99.5 && target >= 100) {
+      // Check completion
+      if (newProgress >= 99.5 && elapsed >= MINIMUM_DURATION && allResourcesReady) {
         isCompleteRef.current = true;
-        progressRef.current = 100;
         
+        // Set to exactly 100%
         if (progressBarRef.current) {
           progressBarRef.current.style.transform = 'scaleX(1)';
         }
@@ -141,12 +151,12 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
           percentRef.current.textContent = '100';
         }
 
-        // Trigger exit animation
-        setTimeout(exitAnimation, 300);
+        // Wait a moment at 100%, then exit
+        setTimeout(exitAnimation, 400);
         return;
       }
 
-      rafRef.current = requestAnimationFrame(animateProgress);
+      rafRef.current = requestAnimationFrame(animate);
     };
 
     const exitAnimation = () => {
@@ -156,10 +166,9 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
         return;
       }
 
-      // Animate out
       gsap.to(container, {
         opacity: 0,
-        duration: 0.5,
+        duration: 0.6,
         ease: 'power2.inOut',
         onComplete: finishLoading,
       });
@@ -183,16 +192,15 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
       } catch (e) {}
     };
 
-    // Start animation loop
-    rafRef.current = requestAnimationFrame(animateProgress);
+    // Start animation
+    rafRef.current = requestAnimationFrame(animate);
 
-    // Failsafe: force complete after 6 seconds
+    // Failsafe: force complete after 8 seconds
     const failsafe = setTimeout(() => {
       if (!isCompleteRef.current) {
-        targetProgressRef.current = 100;
-        minTimeReached = true;
+        allResourcesReady = true;
       }
-    }, 6000);
+    }, 8000);
 
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -222,34 +230,40 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
         }}
       />
 
+      {/* Gradient orbs */}
+      <div className="absolute top-1/4 -left-32 w-64 h-64 bg-cyan-500/10 rounded-full blur-[100px]" />
+      <div className="absolute bottom-1/4 -right-32 w-64 h-64 bg-purple-500/10 rounded-full blur-[100px]" />
+
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center">
         {/* Logo */}
-        <div ref={logoRef} className="mb-12">
-          <div className="text-5xl sm:text-6xl md:text-7xl font-bold text-white tracking-tight">
+        <div ref={logoRef} className="mb-16 opacity-0">
+          <div className="text-5xl sm:text-6xl md:text-8xl font-bold text-white tracking-tight">
             SADOK<span className="text-cyan-500">.</span>
           </div>
         </div>
 
         {/* Progress container */}
-        <div className="w-64 sm:w-72 md:w-80">
+        <div className="w-56 sm:w-64 md:w-72">
           {/* Progress bar background */}
-          <div className="h-[3px] bg-zinc-800 rounded-full overflow-hidden">
+          <div className="h-[2px] bg-zinc-800 rounded-full overflow-hidden">
             {/* Progress bar fill */}
             <div
               ref={progressBarRef}
-              className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 origin-left transition-none"
+              className="h-full bg-gradient-to-r from-cyan-500 via-cyan-400 to-purple-500 origin-left"
               style={{ transform: 'scaleX(0)' }}
             />
           </div>
 
           {/* Percentage */}
-          <div className="mt-4 flex justify-between items-center text-sm">
-            <span className="text-zinc-500 uppercase tracking-widest text-xs">Loading</span>
-            <div className="text-white font-mono">
-              <span ref={percentRef}>0</span>
-              <span className="text-zinc-500">%</span>
-            </div>
+          <div className="mt-6 flex justify-center items-baseline">
+            <span 
+              ref={percentRef} 
+              className="text-4xl sm:text-5xl font-bold text-white font-mono"
+            >
+              0
+            </span>
+            <span className="text-xl sm:text-2xl text-zinc-500 font-mono ml-1">%</span>
           </div>
         </div>
       </div>
