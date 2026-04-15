@@ -3,6 +3,7 @@
 import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Image from 'next/image';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import TextReveal from '@/components/ui/TextReveal';
@@ -14,19 +15,19 @@ gsap.registerPlugin(ScrollTrigger);
 const skills = [
   {
     category: 'Frontend',
-    items: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Framer Motion', 'GSAP'],
+    items: ['Next.js (App Router)', 'React', 'TypeScript', 'Tailwind CSS', 'GSAP', 'Framer Motion'],
   },
   {
-    category: 'Backend',
-    items: ['Node.js', 'Python', 'FastAPI', 'PostgreSQL', 'Redis', 'GraphQL'],
+    category: 'Backend & Systems',
+    items: ['Node.js', 'TypeScript', 'Java (Spring/JavaFX)', 'PHP (Symfony)', 'PostgreSQL', 'Prisma'],
   },
   {
-    category: 'DevOps',
-    items: ['Docker', 'Kubernetes', 'AWS', 'CI/CD', 'Nginx', 'Linux'],
+    category: 'Infrastructure & DevOps',
+    items: ['Docker', 'Nginx', 'Linux (VPS/SSH)', 'CI/CD', 'Webhooks', 'Bash'],
   },
   {
-    category: 'AI & ML',
-    items: ['Ollama', 'TensorFlow', 'LangChain', 'RAG', 'n8n', 'Automation'],
+    category: 'AI & Automation',
+    items: ['Ollama (Local LLMs)', 'n8n (Self-hosted)', 'Workflow Orchestration', 'Telegram Bots', 'RAG'],
   },
 ];
 
@@ -35,14 +36,14 @@ const experience = [
     period: 'Present',
     title: 'Freelance Full Stack Engineer',
     company: 'Self-Employed',
-    description: 'Building scalable web applications and AI-powered solutions for clients worldwide. Specializing in modern tech stacks and cloud architecture.',
+    description: 'Building real-world, cost-effective systems combining modern web technologies, AI integrations, and automated infrastructure for clients worldwide.',
     color: '#06b6d4',
   },
   {
-    period: '2021 - Present',
+    period: '2021 - 2026',
     title: 'Software Engineering Student',
-    company: 'ESPRIT',
-    description: 'Project-based engineering curriculum focusing on distributed systems, modern web technologies, and AI integration. EUR-ACE Accredited.',
+    company: 'ESPRIT (EUR-ACE Accredited)',
+    description: 'Project-based engineering curriculum focusing on distributed systems, software architecture, database design, web technologies, and artificial intelligence.',
     color: '#8b5cf6',
   },
 ];
@@ -144,10 +145,15 @@ export default function AboutPage() {
 
             {/* Photo placeholder */}
             <div className="relative order-first lg:order-last">
-              <div className="aspect-[4/5] rounded-xl sm:rounded-2xl overflow-hidden bg-gradient-to-br from-cyan-500/20 via-purple-500/20 to-zinc-900 border border-zinc-800">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-[120px] sm:text-[160px] md:text-[200px] font-bold text-white/5">S</span>
-                </div>
+              <div className="aspect-[4/5] rounded-xl sm:rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800">
+                <Image
+                  src="/profile/IMG_0273.JPG"
+                  alt="Sadok Dridi"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority
+                />
               </div>
               
               {/* Floating elements */}

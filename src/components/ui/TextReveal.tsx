@@ -39,6 +39,8 @@ export default function TextReveal({
     const container = containerRef.current;
     if (!container) return;
 
+    const isMobile = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768;
+
     // Get the text content
     const text = container.innerText;
     
@@ -75,6 +77,9 @@ export default function TextReveal({
 
     // Get the inner spans to animate
     const innerSpans = container.querySelectorAll('.translate-y-full, .opacity-0');
+
+    const mobileDuration = Math.min(duration, 0.45);
+    const mobileStagger = Math.min(stagger, 0.025);
     
     const animateIn = () => {
       if (once && hasAnimated.current) return;
@@ -83,7 +88,7 @@ export default function TextReveal({
       if (animation === 'fade') {
         gsap.to(innerSpans, {
           opacity: 1,
-          duration,
+          duration: isMobile ? mobileDuration : duration,
           delay,
           ease: 'power3.out',
         });
@@ -91,8 +96,8 @@ export default function TextReveal({
         gsap.to(innerSpans, {
           y: 0,
           opacity: 1,
-          duration,
-          stagger,
+          duration: isMobile ? mobileDuration : duration,
+          stagger: isMobile ? mobileStagger : stagger,
           delay,
           ease: 'power3.out',
         });
@@ -118,9 +123,9 @@ export default function TextReveal({
         trigger: container,
         start: threshold,
         onEnter: animateIn,
-        onEnterBack: animateIn,
-        onLeaveBack: reset,
-        once,
+        onEnterBack: isMobile ? undefined : animateIn,
+        onLeaveBack: isMobile ? undefined : reset,
+        once: isMobile ? true : once,
       });
 
       return () => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import LoadingScreen from '@/components/LoadingScreen';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -13,18 +13,30 @@ import { TextMarquee } from '@/components/ui/Marquee';
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [showContent, setShowContent] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768);
+  }, []);
 
   useEffect(() => {
     if (!isLoading) {
       document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
+      
+      // Force a browser reflow/resize event so mobile browsers (iOS Safari)
+      // recalculate the scrollable height and unlock the view.
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        window.dispatchEvent(new Event('resize'));
+      }, 50);
     }
   }, [isLoading]);
 
-  const handleLoadingComplete = () => {
+  const handleLoadingComplete = useCallback(() => {
     setIsLoading(false);
     setShowContent(true);
-  };
+  }, []);
 
   return (
     <>
@@ -32,7 +44,7 @@ export default function Home() {
 
       <div
         className={showContent ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-        style={{ animation: showContent ? 'fadeIn 0.5s ease-out' : undefined }}
+        style={{ animation: showContent ? `fadeIn ${isMobile ? '0.22s' : '0.5s'} ease-out` : undefined }}
       >
         <Header />
         

@@ -20,6 +20,7 @@ export default function FeaturedWork() {
   useEffect(() => {
     const section = sectionRef.current;
     const projectsContainer = projectsRef.current;
+    const isMobile = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768;
     
     if (!section || !projectsContainer) return;
 
@@ -29,16 +30,17 @@ export default function FeaturedWork() {
     const animations = Array.from(projectCards).map((card) =>
       gsap.fromTo(
         card,
-        { y: 100, opacity: 0 },
+        { y: isMobile ? 36 : 100, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          duration: 1,
+          duration: isMobile ? 0.45 : 1,
           ease: 'power3.out',
           scrollTrigger: {
             trigger: card,
-            start: 'top 85%',
-            toggleActions: 'restart none none reset',
+            start: isMobile ? 'top 92%' : 'top 85%',
+            toggleActions: isMobile ? 'play none none none' : 'restart none none reset',
+            once: isMobile,
           },
         }
       )
@@ -162,6 +164,7 @@ function ProjectCard({ project, index }: ProjectCardProps) {
                 alt={project.title}
                 fill
                 className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
             ) : (
               <div 

@@ -14,9 +14,13 @@ const navLinks = [
 
 export default function Header() {
   const headerRef = useRef<HTMLElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768);
+  }, []);
 
   // Handle scroll state
   useEffect(() => {
@@ -34,12 +38,17 @@ export default function Header() {
     const header = headerRef.current;
     if (!header) return;
 
+    if (isMobile) {
+      gsap.set(header, { y: 0, opacity: 1 });
+      return;
+    }
+
     gsap.fromTo(
       header,
       { y: -50, opacity: 0 },
       { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', delay: 0.2 }
     );
-  }, []);
+  }, [isMobile]);
 
   // Lock body scroll when menu is open
   useEffect(() => {
@@ -55,42 +64,12 @@ export default function Header() {
 
   // Toggle mobile menu
   const toggleMenu = () => {
-    const menu = menuRef.current;
-    if (!menu) return;
-
-    if (!isMenuOpen) {
-      setIsMenuOpen(true);
-      gsap.fromTo(
-        menu,
-        { clipPath: 'circle(0% at calc(100% - 32px) 32px)' },
-        { clipPath: 'circle(150% at calc(100% - 32px) 32px)', duration: 0.8, ease: 'power4.inOut' }
-      );
-      // Animate links
-      gsap.fromTo(
-        menu.querySelectorAll('.nav-link'),
-        { y: 50, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, delay: 0.3, ease: 'power3.out' }
-      );
-    } else {
-      gsap.to(menu, {
-        clipPath: 'circle(0% at calc(100% - 32px) 32px)',
-        duration: 0.6,
-        ease: 'power4.inOut',
-        onComplete: () => setIsMenuOpen(false),
-      });
-    }
+    setIsMenuOpen((prev) => !prev);
   };
 
   // Close menu on link click
   const handleLinkClick = () => {
-    if (isMenuOpen) {
-      gsap.to(menuRef.current, {
-        clipPath: 'circle(0% at calc(100% - 32px) 32px)',
-        duration: 0.6,
-        ease: 'power4.inOut',
-        onComplete: () => setIsMenuOpen(false),
-      });
-    }
+    setIsMenuOpen(false);
   };
 
   return (
@@ -141,9 +120,10 @@ export default function Header() {
             {/* Mobile menu button */}
             <button
               type="button"
-              className="md:hidden relative z-[101] w-11 h-11 flex flex-col items-center justify-center gap-1.5 rounded-full bg-zinc-900/50 border border-zinc-800 active:scale-95 transition-transform"
+              className="md:hidden relative z-[101] pointer-events-auto touch-manipulation w-11 h-11 flex flex-col items-center justify-center gap-1.5 rounded-full bg-zinc-900/50 border border-zinc-800 active:scale-95 transition-transform"
               onClick={toggleMenu}
               aria-label="Toggle menu"
+              aria-expanded={isMenuOpen}
             >
               <span
                 className={cn(
@@ -170,12 +150,10 @@ export default function Header() {
 
       {/* Mobile menu overlay */}
       <div
-        ref={menuRef}
         className={cn(
-          'fixed inset-0 z-[99] bg-zinc-950 md:hidden',
-          !isMenuOpen && 'pointer-events-none'
+          'fixed inset-0 z-[99] bg-zinc-950 md:hidden transition-opacity duration-300',
+          isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         )}
-        style={{ clipPath: 'circle(0% at calc(100% - 32px) 32px)' }}
       >
         {/* Background decoration */}
         <div className="absolute inset-0 overflow-hidden">
@@ -183,14 +161,14 @@ export default function Header() {
           <div className="absolute bottom-1/4 -right-1/4 w-[300px] h-[300px] bg-purple-500/10 rounded-full blur-[100px]" />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center justify-center h-full px-6">
+        <div className="relative z-10 flex h-full flex-col items-center justify-start px-6 pt-28 pb-10 overflow-y-auto">
           {/* Nav links */}
           <div className="flex flex-col items-center gap-6 sm:gap-8">
-            {navLinks.map((link, index) => (
+            {navLinks.map((link) => (
               <TransitionLink
                 key={link.label}
                 href={link.href}
-                className="nav-link"
+                className="nav-link block"
                 onClick={handleLinkClick}
               >
                 <span className="text-3xl sm:text-4xl font-bold text-white hover:text-cyan-400 transition-colors active:scale-95">
@@ -203,7 +181,7 @@ export default function Header() {
           {/* CTA Button */}
           <TransitionLink
             href="/contact"
-            className="nav-link mt-10 sm:mt-12"
+            className="nav-link mt-10 sm:mt-12 block"
             onClick={handleLinkClick}
           >
             <span className="inline-block px-8 py-4 bg-white text-zinc-950 text-base sm:text-lg font-medium rounded-full active:scale-95 transition-transform">

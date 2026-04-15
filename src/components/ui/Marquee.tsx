@@ -46,9 +46,10 @@ export default function Marquee({
     
     // Use CSS animation on mobile for better performance
     if (isMobile) {
-      const duration = itemWidth / speed;
+      const duration = itemWidth / Math.max(speed * 0.6, 12);
       inner.style.animation = `marquee ${duration}s linear infinite`;
       inner.style.setProperty('--marquee-distance', `${directionMultiplier * itemWidth}px`);
+      inner.style.willChange = 'auto';
       return;
     }
     

@@ -80,6 +80,7 @@ export default function CaseStudyClient({ project, nextProject }: CaseStudyClien
                 fill
                 className="object-cover"
                 priority
+                sizes="100vw"
               />
             ) : (
               <div 

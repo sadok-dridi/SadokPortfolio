@@ -14,7 +14,7 @@ import { projects, Project } from '@/data/projects';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const categories = ['All', 'Infrastructure', 'Backend', 'Fintech'];
+const categories = ['All', 'Full Stack', 'Fintech'];
 
 export default function WorkPage() {
   const [activeCategory, setActiveCategory] = useState('All');
@@ -142,6 +142,7 @@ function ProjectCard({ project, index }: ProjectCardProps) {
               className={`object-cover transition-transform duration-700 ${
                 isHovered ? 'scale-105' : 'scale-100'
               }`}
+              sizes="(max-width: 640px) 100vw, 50vw"
             />
           ) : (
             <div 

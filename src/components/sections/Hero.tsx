@@ -25,28 +25,36 @@ export default function Hero({ isLoading = false }: HeroProps) {
     const container = containerRef.current;
     const content = contentRef.current;
     const indicator = scrollIndicatorRef.current;
+    const isMobile = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768;
     
     if (!container || !content) return;
 
     // Get all animatable elements
-    const badge = content.querySelector('.hero-badge');
     const heading = content.querySelector('.hero-heading');
     const subtitle = content.querySelector('.hero-subtitle');
     const buttons = content.querySelector('.hero-buttons');
     const stats = content.querySelectorAll('.hero-stat');
 
+    if (isMobile) {
+      gsap.fromTo(
+        content,
+        { opacity: 0, y: 18 },
+        { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out', delay: 0.05 }
+      );
+
+      gsap.set([heading, subtitle, buttons, stats], { opacity: 1, y: 0 });
+
+      if (indicator) {
+        gsap.set(indicator, { opacity: 0 });
+      }
+
+      return;
+    }
+
     // Create timeline
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
     // Animate elements in sequence
-    if (badge) {
-      tl.fromTo(badge, 
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.6 },
-        0.1
-      );
-    }
-
     if (heading) {
       tl.fromTo(heading,
         { opacity: 0, y: 40 },
@@ -125,17 +133,6 @@ export default function Hero({ isLoading = false }: HeroProps) {
       </div>
 
       <div ref={contentRef} className="relative z-10 container mx-auto">
-        {/* Status badge */}
-        <div className="hero-badge mb-6 sm:mb-8 overflow-hidden opacity-0">
-          <div className="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            <span className="text-xs sm:text-sm text-zinc-400">Available for freelance projects</span>
-          </div>
-        </div>
-
         {/* Main heading */}
         <div className="hero-heading max-w-5xl opacity-0">
           <h1 className="text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white tracking-tight">

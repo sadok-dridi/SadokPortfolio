@@ -10,14 +10,20 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
   const [progress, setProgress] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const completedRef = useRef(false);
   const revealedRef = useRef(false);
 
   useEffect(() => {
+    const mobile = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768;
+    setIsMobile(mobile);
+
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
 
-    const duration = 2600;
+    const duration = mobile ? 1450 : 1850;
+    const revealDelay = mobile ? 120 : 220;
+    const exitDuration = mobile ? 420 : 700;
     const startedAt = Date.now();
 
     const interval = window.setInterval(() => {
@@ -27,7 +33,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
         ? 2 * ratio * ratio
         : 1 - Math.pow(-2 * ratio + 2, 2) / 2;
 
-      setProgress(Math.round(eased * 100));
+      setProgress(prev => Math.max(prev, Math.round(eased * 100)));
 
       if (ratio >= 1 && !completedRef.current) {
         completedRef.current = true;
@@ -45,8 +51,8 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
             document.documentElement.style.overflow = '';
             document.body.style.overflow = '';
             setIsHidden(true);
-          }, 700);
-        }, 350);
+          }, exitDuration);
+        }, revealDelay);
       }
     }, 16);
 
@@ -68,8 +74,8 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
         document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
         setIsHidden(true);
-      }, 700);
-    }, 4500);
+      }, exitDuration);
+    }, mobile ? 2600 : 3600);
 
     return () => {
       window.clearInterval(interval);
@@ -85,12 +91,12 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] flex h-svh w-screen items-center justify-center overflow-hidden bg-zinc-950 transition-transform duration-700 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+      className={`fixed inset-0 z-[9999] flex h-svh w-screen items-center justify-center overflow-hidden bg-black transition-transform ${
+        isMobile ? 'duration-500' : 'duration-700'
+      } ease-[cubic-bezier(0.76,0,0.24,1)] ${
         isExiting ? '-translate-y-full' : 'translate-y-0'
       }`}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(8,145,178,0.12),transparent_40%),linear-gradient(180deg,#09090b_0%,#111114_50%,#09090b_100%)]" />
-
       <div className="relative z-10 flex w-full max-w-3xl flex-col items-center px-6 text-center">
         <div
           className="mb-10 sm:mb-14"
@@ -108,7 +114,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
           />
 
           <div className="min-w-[92px] sm:min-w-[108px]">
-            <span className="text-2xl font-mono font-light tracking-[0.28em] text-zinc-300 sm:text-3xl">
+            <span className="text-2xl font-mono font-light tracking-[0.22em] text-zinc-300 sm:text-3xl">
               {progress.toString().padStart(3, '0')}
             </span>
             <span className="ml-1 text-sm font-mono text-zinc-500 sm:text-base">%</span>
@@ -120,17 +126,6 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
           />
         </div>
 
-        <p className="mt-6 text-[11px] uppercase tracking-[0.35em] text-zinc-600 sm:text-xs">
-          Loading Portfolio
-        </p>
-      </div>
-
-      <div className="absolute bottom-6 left-6 text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-700 sm:bottom-10 sm:left-10 sm:text-xs">
-        Full Stack Engineer
-      </div>
-
-      <div className="absolute bottom-6 right-6 text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-700 sm:bottom-10 sm:right-10 sm:text-xs">
-        2026
       </div>
     </div>
   );

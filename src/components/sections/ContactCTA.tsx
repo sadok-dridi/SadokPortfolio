@@ -17,8 +17,31 @@ export default function ContactCTA() {
   useEffect(() => {
     const section = sectionRef.current;
     const heading = headingRef.current;
+    const isMobile = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768;
     
     if (!section || !heading) return;
+
+    if (isMobile) {
+      const animation = gsap.fromTo(
+        heading,
+        { y: 28, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.5,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 88%',
+            once: true,
+          },
+        }
+      );
+
+      return () => {
+        animation.scrollTrigger?.kill();
+      };
+    }
 
     // Scale up heading on scroll
     const animation = gsap.fromTo(

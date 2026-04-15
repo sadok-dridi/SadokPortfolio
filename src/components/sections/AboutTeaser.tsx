@@ -11,11 +11,11 @@ import { TransitionLink } from '@/components/layout/PageTransition';
 gsap.registerPlugin(ScrollTrigger);
 
 const skills = [
-  { name: 'React / Next.js', level: 95 },
-  { name: 'TypeScript', level: 90 },
-  { name: 'Node.js', level: 88 },
-  { name: 'Python', level: 85 },
-  { name: 'Cloud / DevOps', level: 82 },
+  { name: 'Next.js / React', level: 95 },
+  { name: 'TypeScript / Node.js', level: 90 },
+  { name: 'Java / Symfony', level: 85 },
+  { name: 'Docker / DevOps', level: 82 },
+  { name: 'AI & Automation', level: 80 },
 ];
 
 export default function AboutTeaser() {
@@ -27,8 +27,53 @@ export default function AboutTeaser() {
     const section = sectionRef.current;
     const image = imageRef.current;
     const skillsContainer = skillsRef.current;
+    const isMobile = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768;
     
     if (!section || !image || !skillsContainer) return;
+
+    if (isMobile) {
+      const bars = skillsContainer.querySelectorAll('.skill-bar');
+
+      const imageAnimation = gsap.fromTo(
+        image,
+        { y: 24, opacity: 0.6 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.5,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 88%',
+            once: true,
+          },
+        }
+      );
+
+      const barAnimations = Array.from(bars).map((bar) => {
+        const width = bar.getAttribute('data-width');
+
+        return gsap.fromTo(
+          bar,
+          { width: '0%' },
+          {
+            width: `${width}%`,
+            duration: 0.55,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: bar,
+              start: 'top 95%',
+              once: true,
+            },
+          }
+        );
+      });
+
+      return () => {
+        imageAnimation.scrollTrigger?.kill();
+        barAnimations.forEach((animation) => animation.scrollTrigger?.kill());
+      };
+    }
 
     // Parallax effect on image
     const imageAnimation = gsap.to(image, {
@@ -79,11 +124,13 @@ export default function AboutTeaser() {
                 ref={imageRef}
                 className="absolute inset-0 scale-110"
               >
-                {/* Placeholder image - replace with actual photo */}
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 via-purple-500/20 to-zinc-900" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-9xl font-bold text-white/5">S</span>
-                </div>
+                <Image
+                  src="/profile/IMG_0273.JPG"
+                  alt="Sadok Dridi"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
               </div>
             </div>
             
