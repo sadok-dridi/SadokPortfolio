@@ -77,7 +77,7 @@ export default function Header() {
         <header
           ref={headerRef}
           className={cn(
-          'fixed top-0 left-0 right-0 z-[100] isolate transition-all duration-500',
+          'fixed top-0 left-0 right-0 z-[100] isolate transition-all duration-500 opacity-0',
           isScrolled 
             ? 'py-3 md:py-4 bg-zinc-950/80 backdrop-blur-lg after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-zinc-800/40' 
             : 'py-4 md:py-6'
@@ -193,8 +193,8 @@ export default function Header() {
           <div className="nav-link mt-12 sm:mt-16 flex items-center gap-6">
             {[
               { label: 'GitHub', href: 'https://github.com/sadok-dridi' },
-              { label: 'LinkedIn', href: 'https://linkedin.com/in/sadok-dridi' },
-              { label: 'Twitter', href: 'https://twitter.com/sadok' },
+              { label: 'LinkedIn', href: 'https://www.linkedin.com/in/sadok-dridi/' },
+              { label: 'Instagram', href: 'https://www.instagram.com/sadok.dridi/' },
             ].map((social) => (
               <a
                 key={social.label}

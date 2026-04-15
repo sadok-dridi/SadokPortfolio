@@ -136,12 +136,12 @@ export default function ContactCTA() {
             </MagneticButton>
           </TransitionLink>
 
-          <a href="mailto:hello@sadok.dev">
+          <a href="mailto:sadok.dridi.engineer@gmail.com">
             <MagneticButton
               as="div"
               className="px-10 py-5 border border-zinc-700 text-white text-lg font-medium rounded-full hover:border-zinc-500 hover:bg-zinc-800/50 transition-all duration-300"
             >
-              hello@sadok.dev
+              sadok.dridi.engineer@gmail.com
             </MagneticButton>
           </a>
         </div>
@@ -149,9 +149,9 @@ export default function ContactCTA() {
         {/* Social links */}
         <div className="mt-16 flex items-center justify-center gap-6">
           {[
-            { label: 'GitHub', href: 'https://github.com/sadok' },
-            { label: 'LinkedIn', href: 'https://linkedin.com/in/sadok' },
-            { label: 'Twitter', href: 'https://twitter.com/sadok' },
+            { label: 'GitHub', href: 'https://github.com/sadok-dridi' },
+            { label: 'LinkedIn', href: 'https://www.linkedin.com/in/sadok-dridi/' },
+            { label: 'Instagram', href: 'https://www.instagram.com/sadok.dridi/' },
           ].map((social) => (
             <a
               key={social.label}

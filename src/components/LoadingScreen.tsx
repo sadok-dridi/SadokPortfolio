@@ -48,8 +48,8 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
           setIsExiting(true);
 
           window.setTimeout(() => {
-            document.documentElement.style.overflow = '';
-            document.body.style.overflow = '';
+            document.documentElement.style.removeProperty('overflow');
+            document.body.style.removeProperty('overflow');
             setIsHidden(true);
           }, exitDuration);
         }, revealDelay);
@@ -71,8 +71,8 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
       setIsExiting(true);
 
       window.setTimeout(() => {
-        document.documentElement.style.overflow = '';
-        document.body.style.overflow = '';
+        document.documentElement.style.removeProperty('overflow');
+        document.body.style.removeProperty('overflow');
         setIsHidden(true);
       }, exitDuration);
     }, mobile ? 2600 : 3600);
@@ -80,8 +80,8 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
     return () => {
       window.clearInterval(interval);
       window.clearTimeout(fallback);
-      document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
+      document.documentElement.style.removeProperty('overflow');
+      document.body.style.removeProperty('overflow');
     };
   }, [onComplete]);
 
@@ -94,7 +94,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
       className={`fixed inset-0 z-[9999] flex h-svh w-screen items-center justify-center overflow-hidden bg-black transition-transform ${
         isMobile ? 'duration-500' : 'duration-700'
       } ease-[cubic-bezier(0.76,0,0.24,1)] ${
-        isExiting ? '-translate-y-full' : 'translate-y-0'
+        isExiting ? '-translate-y-full pointer-events-none' : 'translate-y-0'
       }`}
     >
       <div className="relative z-10 flex w-full max-w-3xl flex-col items-center px-6 text-center">

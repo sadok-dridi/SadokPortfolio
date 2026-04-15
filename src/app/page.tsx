@@ -21,8 +21,8 @@ export default function Home() {
 
   useEffect(() => {
     if (!isLoading) {
-      document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
+      document.documentElement.style.removeProperty('overflow');
+      document.body.style.removeProperty('overflow');
       
       // Force a browser reflow/resize event so mobile browsers (iOS Safari)
       // recalculate the scrollable height and unlock the view.

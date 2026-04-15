@@ -30,7 +30,7 @@ export const projects: Project[] = [
     description: 'A hybrid-cloud opportunity routing system using Next.js and PostgreSQL, with self-hosted AI inference via Ollama and automated n8n workflows.',
     longDescription: 'radarX is a hybrid-cloud intelligence platform that revolutionizes how sales teams handle incoming opportunities. It uses self-hosted AI models via Ollama for on-premise inference, automated data ingestion through n8n workflows, and a secure Next.js dashboard with JWT authentication and RBAC — all containerized with Docker and deployed on a VPS with Nginx.',
     category: 'Full Stack',
-    year: '2024',
+    year: '2026',
     role: 'Full Stack Engineer',
     technologies: ['Next.js', 'PostgreSQL', 'Prisma', 'n8n', 'Ollama', 'Docker', 'SSH Tunneling'],
     thumbnail: '/projects/radarx/landingPage.png',
@@ -42,6 +42,7 @@ export const projects: Project[] = [
       '/projects/radarx/4.png',
     ],
     githubUrl: 'https://github.com/sadok-dridi/radarx',
+    liveUrl: 'https://radarx.mooo.com/',
     featured: true,
     color: '#8b5cf6',
     challenges: [
@@ -68,7 +69,7 @@ export const projects: Project[] = [
     description: 'A fintech escrow platform with hash-chained ledger security, automated wallet management, and real-time Telegram alerts.',
     longDescription: 'FinHub-TN is a secure fintech escrow platform that separates core ledger logic (Symfony REST APIs) from the client terminal (JavaFX). It features hash-chained ledger integrity verification, automated wallet management, and real-time transaction alerts via self-hosted n8n and a custom Telegram bot — simulating enterprise banking architectures.',
     category: 'Fintech',
-    year: '2024',
+    year: '2026',
     role: 'Full Stack Developer',
     technologies: ['JavaFX', 'Symfony', 'Webhooks', 'Telegram API', 'n8n', 'Ledger Security'],
     thumbnail: '/projects/finhub-tn/landingPage.png',
@@ -79,6 +80,7 @@ export const projects: Project[] = [
       '/projects/finhub-tn/3.png',
       '/projects/finhub-tn/4.png',
     ],
+    liveUrl: 'https://www.finhub.tn/',
     featured: true,
     color: '#10b981',
     challenges: [

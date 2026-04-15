@@ -10,10 +10,10 @@ import { TextMarquee } from '@/components/ui/Marquee';
 gsap.registerPlugin(ScrollTrigger);
 
 const socialLinks = [
-  { label: 'GitHub', href: 'https://github.com/sadok' },
-  { label: 'LinkedIn', href: 'https://linkedin.com/in/sadok' },
-  { label: 'Twitter', href: 'https://twitter.com/sadok' },
-  { label: 'Email', href: 'mailto:hello@sadok.dev' },
+  { label: 'GitHub', href: 'https://github.com/sadok-dridi' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/sadok-dridi/' },
+  { label: 'Instagram', href: 'https://www.instagram.com/sadok.dridi/' },
+  { label: 'Email', href: 'mailto:sadok.dridi.engineer@gmail.com' },
 ];
 
 export default function Footer() {
@@ -68,13 +68,6 @@ export default function Footer() {
               Full Stack Engineer crafting digital experiences that blend beautiful design with powerful functionality.
             </p>
             
-            <div className="mt-6 md:mt-8 flex items-center gap-2">
-              <span className="relative flex h-2.5 w-2.5 sm:h-3 sm:w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 bg-green-500"></span>
-              </span>
-              <span className="text-xs sm:text-sm text-zinc-400">Available for new projects</span>
-            </div>
           </div>
 
           {/* Quick links */}

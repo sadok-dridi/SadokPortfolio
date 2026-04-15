@@ -52,6 +52,39 @@ export default function AboutPage() {
   const heroRef = useRef<HTMLElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
 
+  // Master entrance timeline for hero section
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero) return;
+
+    const subtitle = hero.querySelector('.about-subtitle');
+    const heading = hero.querySelector('.about-heading');
+    const description = hero.querySelector('.about-description');
+    const buttons = hero.querySelector('.about-buttons');
+    const photo = hero.querySelector('.about-photo');
+
+    gsap.set([subtitle, heading, description], { y: 30 });
+    gsap.set(buttons, { y: 20 });
+    gsap.set(photo, { y: 40 });
+
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+    // 1. Subtitle label
+    tl.to(subtitle, { opacity: 1, y: 0, duration: 0.6 }, 0.3);
+    // 2. Heading
+    tl.to(heading, { opacity: 1, y: 0, duration: 0.7 }, 0.45);
+    // 3. Description
+    tl.to(description, { opacity: 1, y: 0, duration: 0.6 }, 0.65);
+    // 4. Buttons
+    tl.to(buttons, { opacity: 1, y: 0, duration: 0.5 }, 0.85);
+    // 5. Photo section
+    tl.to(photo, { opacity: 1, y: 0, duration: 0.8 }, 0.5);
+
+    return () => {
+      tl.kill();
+    };
+  }, []);
+
   useEffect(() => {
     const stats = statsRef.current;
     if (!stats) return;
@@ -89,40 +122,22 @@ export default function AboutPage() {
         <section ref={heroRef} className="container mx-auto px-4 sm:px-6 md:px-12 mb-16 md:mb-32">
           <div className="grid lg:grid-cols-2 gap-10 md:gap-16 items-center">
             <div>
-              <TextReveal
-                as="span"
-                animation="words"
-                className="text-xs sm:text-sm text-cyan-500 uppercase tracking-widest"
-                trigger="load"
-                delay={0.2}
-              >
+              <span className="about-subtitle block text-xs sm:text-sm text-cyan-500 uppercase tracking-widest opacity-0">
                 About Me
-              </TextReveal>
+              </span>
               
-              <TextReveal
-                as="h1"
-                animation="words"
-                className="mt-3 md:mt-4 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight"
-                trigger="load"
-                delay={0.4}
-              >
+              <h1 className="about-heading mt-3 md:mt-4 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight opacity-0">
                 Building the future, one line of code at a time
-              </TextReveal>
+              </h1>
               
-              <TextReveal
-                as="p"
-                animation="fade"
-                className="mt-4 md:mt-6 text-base sm:text-lg md:text-xl text-zinc-400 leading-relaxed"
-                trigger="load"
-                delay={0.6}
-              >
+              <p className="about-description mt-4 md:mt-6 text-base sm:text-lg md:text-xl text-zinc-400 leading-relaxed opacity-0">
                 I&apos;m a Full Stack Engineer passionate about creating digital experiences 
                 that combine beautiful design with powerful functionality. With expertise 
                 in modern web technologies and cloud infrastructure, I help businesses 
                 transform their ideas into reality.
-              </TextReveal>
+              </p>
 
-              <div className="mt-6 md:mt-8 flex flex-wrap gap-3 sm:gap-4">
+              <div className="about-buttons mt-6 md:mt-8 flex flex-wrap gap-3 sm:gap-4 opacity-0">
                 <TransitionLink href="/contact">
                   <MagneticButton
                     as="div"
@@ -143,8 +158,8 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* Photo placeholder */}
-            <div className="relative order-first lg:order-last">
+            {/* Photo */}
+            <div className="about-photo relative order-first lg:order-last opacity-0">
               <div className="aspect-[4/5] rounded-xl sm:rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800">
                 <Image
                   src="/profile/IMG_0273.JPG"

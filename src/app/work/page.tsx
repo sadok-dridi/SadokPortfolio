@@ -7,7 +7,6 @@ import Image from 'next/image';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { TransitionLink } from '@/components/layout/PageTransition';
-import TextReveal from '@/components/ui/TextReveal';
 import TiltCard from '@/components/ui/TiltCard';
 import MagneticButton from '@/components/ui/MagneticButton';
 import { projects, Project } from '@/data/projects';
@@ -19,25 +18,72 @@ const categories = ['All', 'Full Stack', 'Fintech'];
 export default function WorkPage() {
   const [activeCategory, setActiveCategory] = useState('All');
   const gridRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
+  const hasInitialAnimated = useRef(false);
 
   const filteredProjects = activeCategory === 'All' 
     ? projects 
     : projects.filter(p => p.category === activeCategory);
 
+  // Master entrance timeline — runs once on initial mount
   useEffect(() => {
+    if (hasInitialAnimated.current) return;
+    hasInitialAnimated.current = true;
+
+    const hero = heroRef.current;
+    const filter = filterRef.current;
+    const grid = gridRef.current;
+    if (!hero || !filter || !grid) return;
+
+    const subtitle = hero.querySelector('.work-subtitle');
+    const heading = hero.querySelector('.work-heading');
+    const description = hero.querySelector('.work-description');
+    const filterButtons = filter.querySelectorAll('.filter-btn');
+    const cards = grid.querySelectorAll('.project-card');
+
+    // Set initial y-offset (opacity-0 is already set via CSS classes)
+    gsap.set([subtitle, heading, description], { y: 30 });
+    gsap.set(filterButtons, { y: 20 });
+    gsap.set(cards, { y: 60 });
+
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+    // 1. Subtitle label
+    tl.to(subtitle, { opacity: 1, y: 0, duration: 0.6 }, 0.3);
+    // 2. Heading
+    tl.to(heading, { opacity: 1, y: 0, duration: 0.7 }, 0.45);
+    // 3. Description
+    tl.to(description, { opacity: 1, y: 0, duration: 0.6 }, 0.65);
+    // 4. Filter buttons
+    tl.to(filterButtons, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 }, 0.8);
+    // 5. Project cards (staggered)
+    tl.to(cards, { opacity: 1, y: 0, duration: 0.7, stagger: 0.12 }, 1.0);
+
+    return () => {
+      tl.kill();
+    };
+  }, []);
+
+  // Re-animate cards only when filter actually changes (skip initial mount)
+  const prevCategoryRef = useRef(activeCategory);
+  useEffect(() => {
+    if (prevCategoryRef.current === activeCategory) return;
+    prevCategoryRef.current = activeCategory;
+
     const grid = gridRef.current;
     if (!grid) return;
 
     const cards = grid.querySelectorAll('.project-card');
-    
+
     gsap.fromTo(
       cards,
-      { y: 60, opacity: 0 },
+      { y: 40, opacity: 0 },
       {
         y: 0,
         opacity: 1,
-        duration: 0.8,
-        stagger: 0.1,
+        duration: 0.6,
+        stagger: 0.08,
         ease: 'power3.out',
       }
     );
@@ -49,47 +95,29 @@ export default function WorkPage() {
       
       <main className="pt-24 sm:pt-28 md:pt-32 pb-16 md:pb-20">
         {/* Hero */}
-        <section className="container mx-auto px-4 sm:px-6 md:px-12 mb-12 md:mb-20">
-          <TextReveal
-            as="span"
-            animation="words"
-            className="text-xs sm:text-sm text-cyan-500 uppercase tracking-widest"
-            trigger="load"
-            delay={0.2}
-          >
+        <section ref={heroRef} className="container mx-auto px-4 sm:px-6 md:px-12 mb-12 md:mb-20">
+          <span className="work-subtitle block text-xs sm:text-sm text-cyan-500 uppercase tracking-widest opacity-0">
             Portfolio
-          </TextReveal>
+          </span>
           
-          <TextReveal
-            as="h1"
-            animation="words"
-            className="mt-3 md:mt-4 text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white max-w-4xl"
-            trigger="load"
-            delay={0.4}
-          >
-            Selected projects & case studies
-          </TextReveal>
+          <h1 className="work-heading mt-3 md:mt-4 text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white max-w-4xl opacity-0">
+            Selected projects &amp; case studies
+          </h1>
           
-          <TextReveal
-            as="p"
-            animation="fade"
-            className="mt-4 md:mt-6 text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl"
-            trigger="load"
-            delay={0.6}
-          >
+          <p className="work-description mt-4 md:mt-6 text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl opacity-0">
             A collection of projects showcasing my expertise in full-stack development,
             cloud architecture, and AI integration.
-          </TextReveal>
+          </p>
         </section>
 
         {/* Filter */}
         <section className="container mx-auto px-4 sm:px-6 md:px-12 mb-8 md:mb-12">
-          <div className="flex flex-wrap gap-2 sm:gap-3">
+          <div ref={filterRef} className="flex flex-wrap gap-2 sm:gap-3">
             {categories.map((category) => (
               <MagneticButton
                 key={category}
                 onClick={() => setActiveCategory(category)}
-                className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 ${
+                className={`filter-btn opacity-0 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 ${
                   activeCategory === category
                     ? 'bg-white text-zinc-950'
                     : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800'
@@ -125,9 +153,10 @@ function ProjectCard({ project, index }: ProjectCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
+    <div className="project-card opacity-0">
     <TransitionLink href={`/work/${project.slug}`}>
       <TiltCard
-        className="project-card group relative rounded-xl sm:rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors duration-300"
+        className="group relative rounded-xl sm:rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors duration-300"
         tiltAmount={5}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -212,5 +241,6 @@ function ProjectCard({ project, index }: ProjectCardProps) {
         </div>
       </TiltCard>
     </TransitionLink>
+    </div>
   );
 }

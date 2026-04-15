@@ -33,7 +33,7 @@ export default function CVPage() {
             <h2 className="text-xl font-medium text-cyan-600 mb-4">Full Stack Engineer | AI & Automation Systems</h2>
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-zinc-600 font-medium">
               <span>Tunis, Tunisia</span>
-              <span>sadok.dridi@esprit.tn</span>
+              <span>sadok.dridi.engineer@gmail.com</span>
               <a href="https://github.com/sadok-dridi" className="hover:text-cyan-600">github.com/sadok-dridi</a>
               <a href="https://linkedin.com/in/" className="hover:text-cyan-600">LinkedIn</a>
             </div>

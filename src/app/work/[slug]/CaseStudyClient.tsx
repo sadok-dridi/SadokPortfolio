@@ -7,7 +7,6 @@ import Image from 'next/image';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { TransitionLink } from '@/components/layout/PageTransition';
-import TextReveal from '@/components/ui/TextReveal';
 import MagneticButton from '@/components/ui/MagneticButton';
 import ParallaxImage from '@/components/ui/ParallaxImage';
 import { Project } from '@/data/projects';
@@ -21,15 +20,36 @@ interface CaseStudyClientProps {
 
 export default function CaseStudyClient({ project, nextProject }: CaseStudyClientProps) {
   const heroImageRef = useRef<HTMLDivElement>(null);
+  const heroContentRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
+  // Master entrance timeline for hero
   useEffect(() => {
+    const heroContent = heroContentRef.current;
     const heroImage = heroImageRef.current;
-    const content = contentRef.current;
-    
-    if (!heroImage || !content) return;
+    if (!heroContent || !heroImage) return;
 
-    // Hero image parallax
+    const badges = heroContent.querySelector('.case-badges');
+    const title = heroContent.querySelector('.case-title');
+    const subtitle = heroContent.querySelector('.case-subtitle');
+
+    gsap.set(heroImage, { scale: 1.05 });
+    gsap.set(badges, { y: 20 });
+    gsap.set(title, { y: 30 });
+    gsap.set(subtitle, { y: 20 });
+
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+    // 1. Hero image fades in & scales down
+    tl.to(heroImage, { opacity: 1, scale: 1, duration: 1.2 }, 0.2);
+    // 2. Metadata badges
+    tl.to(badges, { opacity: 1, y: 0, duration: 0.6 }, 0.5);
+    // 3. Title
+    tl.to(title, { opacity: 1, y: 0, duration: 0.7 }, 0.65);
+    // 4. Subtitle
+    tl.to(subtitle, { opacity: 1, y: 0, duration: 0.6 }, 0.85);
+
+    // Hero image parallax on scroll
     gsap.to(heroImage, {
       y: 100,
       ease: 'none',
@@ -41,7 +61,16 @@ export default function CaseStudyClient({ project, nextProject }: CaseStudyClien
       },
     });
 
-    // Content reveal
+    return () => {
+      tl.kill();
+    };
+  }, []);
+
+  // Scroll-triggered content sections
+  useEffect(() => {
+    const content = contentRef.current;
+    if (!content) return;
+
     const sections = content.querySelectorAll('.reveal-section');
     sections.forEach((section) => {
       gsap.fromTo(
@@ -72,7 +101,7 @@ export default function CaseStudyClient({ project, nextProject }: CaseStudyClien
       <main className="pt-24">
         {/* Hero Section */}
         <section className="relative h-[70vh] min-h-[500px] overflow-hidden">
-          <div ref={heroImageRef} className="absolute inset-0">
+          <div ref={heroImageRef} className="absolute inset-0 opacity-0">
             {project.images[0] ? (
               <Image
                 src={project.images[0]}
@@ -94,9 +123,9 @@ export default function CaseStudyClient({ project, nextProject }: CaseStudyClien
           </div>
 
           {/* Hero content */}
-          <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
+          <div ref={heroContentRef} className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
             <div className="container mx-auto">
-              <div className="flex flex-wrap items-center gap-4 mb-4">
+              <div className="case-badges flex flex-wrap items-center gap-4 mb-4 opacity-0">
                 <span className="px-3 py-1 text-xs font-medium text-white bg-zinc-900/80 backdrop-blur-sm rounded-full border border-zinc-800">
                   {project.category}
                 </span>
@@ -105,24 +134,13 @@ export default function CaseStudyClient({ project, nextProject }: CaseStudyClien
                 <span className="text-zinc-400">{project.role}</span>
               </div>
 
-              <TextReveal
-                as="h1"
-                animation="words"
-                className="text-4xl md:text-6xl lg:text-7xl font-bold text-white"
-                trigger="load"
-              >
+              <h1 className="case-title text-4xl md:text-6xl lg:text-7xl font-bold text-white opacity-0">
                 {project.title}
-              </TextReveal>
+              </h1>
               
-              <TextReveal
-                as="p"
-                animation="fade"
-                className="mt-4 text-xl md:text-2xl text-zinc-300 max-w-2xl"
-                trigger="load"
-                delay={0.3}
-              >
+              <p className="case-subtitle mt-4 text-xl md:text-2xl text-zinc-300 max-w-2xl opacity-0">
                 {project.subtitle}
-              </TextReveal>
+              </p>
             </div>
           </div>
         </section>
@@ -130,7 +148,7 @@ export default function CaseStudyClient({ project, nextProject }: CaseStudyClien
         {/* Main Content */}
         <div ref={contentRef} className="container mx-auto px-6 md:px-12 py-20">
           {/* Overview */}
-          <section className="reveal-section grid lg:grid-cols-3 gap-12 mb-24">
+          <section className="reveal-section opacity-0 grid lg:grid-cols-3 gap-12 mb-24">
             <div className="lg:col-span-2">
               <h2 className="text-sm text-cyan-500 uppercase tracking-widest mb-4">Overview</h2>
               <p className="text-xl md:text-2xl text-zinc-300 leading-relaxed">
@@ -182,7 +200,7 @@ export default function CaseStudyClient({ project, nextProject }: CaseStudyClien
 
           {/* Gallery */}
           {project.images.length > 0 && (
-            <section className="reveal-section mb-24">
+            <section className="reveal-section opacity-0 mb-24">
               <h2 className="text-sm text-cyan-500 uppercase tracking-widest mb-8">Gallery</h2>
               <div className="grid md:grid-cols-2 gap-6">
                 {project.images.map((image, index) => (
@@ -206,7 +224,7 @@ export default function CaseStudyClient({ project, nextProject }: CaseStudyClien
 
           {/* Challenge, Solution, Results */}
           {(project.challenges || project.solutions || project.results) && (
-            <section className="reveal-section grid md:grid-cols-3 gap-8 mb-24">
+            <section className="reveal-section opacity-0 grid md:grid-cols-3 gap-8 mb-24">
               {project.challenges && (
                 <div className="p-8 rounded-2xl bg-zinc-900/50 border border-zinc-800">
                   <div className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-6">
@@ -264,7 +282,7 @@ export default function CaseStudyClient({ project, nextProject }: CaseStudyClien
           )}
 
           {/* Next Project */}
-          <section className="reveal-section border-t border-zinc-800 pt-20">
+          <section className="reveal-section opacity-0 border-t border-zinc-800 pt-20">
             <span className="text-sm text-zinc-500 uppercase tracking-wider">Next Project</span>
             
             <TransitionLink href={`/work/${nextProject.slug}`}>

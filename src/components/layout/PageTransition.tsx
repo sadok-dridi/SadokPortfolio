@@ -45,6 +45,23 @@ export function PageTransitionProvider({ children }: PageTransitionProps) {
     );
   }, [pathname]);
 
+  // Reset transition state when returning via browser back/forward (bfcache)
+  useEffect(() => {
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        // Page was restored from bfcache — reset everything
+        const overlay = overlayRef.current;
+        const content = contentRef.current;
+        if (overlay) gsap.set(overlay, { yPercent: 100 });
+        if (content) gsap.set(content, { opacity: 1, y: 0 });
+        setIsTransitioning(false);
+      }
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
+  }, []);
+
   const startTransition = useCallback(async (href: string): Promise<void> => {
     const overlay = overlayRef.current;
     if (!overlay || isTransitioning) return;
