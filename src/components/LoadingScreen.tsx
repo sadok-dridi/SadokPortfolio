@@ -21,6 +21,14 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
 
+    // iOS Safari completely ignores overflow: hidden sometimes, or fails to unlock.
+    // Intercepting scroll events directly guarantees no scrolling while loading.
+    const preventScroll = (e: Event) => {
+      e.preventDefault();
+    };
+    document.addEventListener('touchmove', preventScroll, { passive: false });
+    document.addEventListener('wheel', preventScroll, { passive: false });
+
     const duration = mobile ? 1450 : 1850;
     const revealDelay = mobile ? 120 : 220;
     const exitDuration = mobile ? 420 : 700;
@@ -50,6 +58,8 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
           window.setTimeout(() => {
             document.documentElement.style.removeProperty('overflow');
             document.body.style.removeProperty('overflow');
+            document.removeEventListener('touchmove', preventScroll);
+            document.removeEventListener('wheel', preventScroll);
             setIsHidden(true);
           }, exitDuration);
         }, revealDelay);
@@ -73,6 +83,8 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
       window.setTimeout(() => {
         document.documentElement.style.removeProperty('overflow');
         document.body.style.removeProperty('overflow');
+        document.removeEventListener('touchmove', preventScroll);
+        document.removeEventListener('wheel', preventScroll);
         setIsHidden(true);
       }, exitDuration);
     }, mobile ? 2600 : 3600);
@@ -82,6 +94,8 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
       window.clearTimeout(fallback);
       document.documentElement.style.removeProperty('overflow');
       document.body.style.removeProperty('overflow');
+      document.removeEventListener('touchmove', preventScroll);
+      document.removeEventListener('wheel', preventScroll);
     };
   }, [onComplete]);
 
