@@ -79,6 +79,7 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setIsSubmitting(true);
     setError('');
 
@@ -309,8 +310,7 @@ export default function ContactPage() {
                     <MagneticButton
                       as="button"
                       onClick={() => {}}
-                      className="w-full py-3 sm:py-4 bg-white text-sm sm:text-base text-zinc-950 font-medium rounded-full hover:bg-cyan-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      disabled={isSubmitting}
+                      className="w-full py-3 sm:py-4 bg-white text-sm sm:text-base text-zinc-950 font-medium rounded-full hover:bg-cyan-400 transition-colors"
                     >
                       {isSubmitting ? (
                         <span className="flex items-center justify-center gap-2">

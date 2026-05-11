@@ -46,7 +46,8 @@ No `typecheck`, `test`, or `format` scripts exist. There is no testing framework
 ## Conventions
 
 - Uses ESLint v9 flat config format (`eslint.config.mjs`), NOT `.eslintrc.*`.
-- No `.env.example` — no environment variables needed for the app to run.
+- Environment variables: `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are required in `.env.local` for the contact form API route (`src/app/api/contact/route.ts`). No `.env.example` exists.
 - `next-env.d.ts` is auto-generated and ignored by ESLint.
 - `.gitignore` excludes yarn/pnpm lockfiles — only `package-lock.json` (npm) is used.
 - `noise` CSS class adds an SVG noise texture overlay via `::before` pseudo-element.
+- `MagneticButton` does not accept a `disabled` prop — guard clicks in the handler instead.
