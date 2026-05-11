@@ -48,6 +48,7 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   // Master entrance timeline
   useEffect(() => {
@@ -79,23 +80,35 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError('');
 
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formState),
+      });
 
-    // Reset form
-    setFormState({ name: '', email: '', subject: '', message: '' });
+      const data = await res.json();
 
-    // Animate success
-    if (formRef.current) {
-      gsap.fromTo(
-        formRef.current,
-        { scale: 0.98 },
-        { scale: 1, duration: 0.3, ease: 'back.out(1.5)' }
-      );
+      if (!res.ok) {
+        throw new Error(data.error || 'Something went wrong');
+      }
+
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+      setFormState({ name: '', email: '', subject: '', message: '' });
+
+      if (formRef.current) {
+        gsap.fromTo(
+          formRef.current,
+          { scale: 0.98 },
+          { scale: 1, duration: 0.3, ease: 'back.out(1.5)' }
+        );
+      }
+    } catch (err) {
+      setIsSubmitting(false);
+      setError(err instanceof Error ? err.message : 'Failed to send message. Please try again.');
     }
   };
 
@@ -287,10 +300,17 @@ export default function ContactPage() {
                       />
                     </div>
 
+                    {error && (
+                      <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                        <p className="text-sm text-red-400">{error}</p>
+                      </div>
+                    )}
+
                     <MagneticButton
                       as="button"
                       onClick={() => {}}
                       className="w-full py-3 sm:py-4 bg-white text-sm sm:text-base text-zinc-950 font-medium rounded-full hover:bg-cyan-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={isSubmitting}
                     >
                       {isSubmitting ? (
                         <span className="flex items-center justify-center gap-2">

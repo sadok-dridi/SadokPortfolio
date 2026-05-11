@@ -15,6 +15,13 @@ export default function CVPage() {
             <ArrowLeft size={16} /> Back to Portfolio
           </Link>
           <div className="flex gap-4">
+            <a
+              href="/SadokDridiResume.pdf"
+              download
+              className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+            >
+              <Download size={16} /> Download
+            </a>
             <button onClick={() => window.print()} className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors">
               <Printer size={16} /> Print
             </button>
