@@ -37,7 +37,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
-      <body className="min-h-screen flex flex-col bg-zinc-950 text-white">
+      <body className="min-h-screen flex flex-col bg-zinc-950 text-white" suppressHydrationWarning>
         <SmoothScroll>
           <CustomCursor />
           <PageTransitionProvider>

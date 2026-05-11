@@ -309,6 +309,7 @@ export default function ContactPage() {
 
                     <MagneticButton
                       as="button"
+                      type="submit"
                       onClick={() => {}}
                       className="w-full py-3 sm:py-4 bg-white text-sm sm:text-base text-zinc-950 font-medium rounded-full hover:bg-cyan-400 transition-colors"
                     >

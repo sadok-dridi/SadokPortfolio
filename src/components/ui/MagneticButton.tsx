@@ -13,6 +13,7 @@ interface MagneticButtonProps {
   onClick?: () => void;
   cursorText?: string;
   cursorVariant?: 'default' | 'text' | 'hidden' | 'large';
+  type?: 'button' | 'submit' | 'reset';
 }
 
 export default function MagneticButton({
@@ -24,6 +25,7 @@ export default function MagneticButton({
   onClick,
   cursorText,
   cursorVariant = 'default',
+  type = 'button',
 }: MagneticButtonProps) {
   const buttonRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLSpanElement>(null);
@@ -120,7 +122,7 @@ export default function MagneticButton({
       );
     }
     return (
-      <button className={cn('relative inline-flex items-center justify-center', className)} onClick={onClick} type="button">
+      <button className={cn('relative inline-flex items-center justify-center', className)} onClick={onClick} type={type}>
         {children}
       </button>
     );
@@ -152,7 +154,7 @@ export default function MagneticButton({
   }
 
   return (
-    <button {...commonProps} onClick={onClick} type="button">
+    <button {...commonProps} onClick={onClick} type={type}>
       {content}
     </button>
   );
