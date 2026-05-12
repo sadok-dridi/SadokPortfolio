@@ -65,7 +65,7 @@ export default function Footer() {
               </span>
             </TransitionLink>
             <p className="mt-3 md:mt-4 text-sm sm:text-base text-zinc-500 max-w-md">
-              Full Stack Engineer crafting digital experiences that blend beautiful design with powerful functionality.
+              AI & Automation Developer crafting digital experiences that blend beautiful design with powerful functionality.
             </p>
             
           </div>

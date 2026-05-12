@@ -33,7 +33,6 @@ export default function Hero({ isLoading = false }: HeroProps) {
     const heading = content.querySelector('.hero-heading');
     const subtitle = content.querySelector('.hero-subtitle');
     const buttons = content.querySelector('.hero-buttons');
-    const stats = content.querySelectorAll('.hero-stat');
 
     if (isMobile) {
       gsap.fromTo(
@@ -42,7 +41,7 @@ export default function Hero({ isLoading = false }: HeroProps) {
         { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out', delay: 0.05 }
       );
 
-      gsap.set([heading, subtitle, buttons, stats], { opacity: 1, y: 0 });
+      gsap.set([heading, subtitle, buttons], { opacity: 1, y: 0 });
 
       if (indicator) {
         gsap.set(indicator, { opacity: 0 });
@@ -76,14 +75,6 @@ export default function Hero({ isLoading = false }: HeroProps) {
         { opacity: 0, y: 20 },
         { opacity: 1, y: 0, duration: 0.6 },
         0.6
-      );
-    }
-
-    if (stats.length > 0) {
-      tl.fromTo(stats,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.5, stagger: 0.1 },
-        0.7
       );
     }
 
@@ -136,16 +127,19 @@ export default function Hero({ isLoading = false }: HeroProps) {
         {/* Main heading */}
         <div className="hero-heading max-w-5xl opacity-0">
           <h1 className="text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white tracking-tight">
-            I build digital experiences that make an impact
+            I build AI-powered web apps and automation systems
           </h1>
         </div>
 
         {/* Subtitle */}
         <div className="hero-subtitle mt-5 sm:mt-6 md:mt-8 max-w-2xl opacity-0">
           <p className="text-base sm:text-lg md:text-xl text-zinc-400 leading-relaxed">
-            Full Stack Engineer specializing in modern web applications, 
-            cloud infrastructure, and AI-powered solutions.
+            3rd year engineering student at ESPRIT. I build real products — AI integrations, automation pipelines, and full stack web apps. Open to freelance projects and collaborations.
           </p>
+          <div className="mt-4 flex items-center gap-2 text-sm md:text-base text-zinc-300">
+            <svg className="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            Based in Tunisia. Available for remote work worldwide.
+          </div>
         </div>
 
         {/* CTA buttons */}
@@ -181,24 +175,7 @@ export default function Hero({ isLoading = false }: HeroProps) {
           </TransitionLink>
         </div>
 
-        {/* Stats row */}
-        <div className="mt-16 sm:mt-20 md:mt-24 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 md:gap-12">
-          {[
-            { value: '5+', label: 'Years Experience' },
-            { value: '20+', label: 'Projects Completed' },
-            { value: '15+', label: 'Happy Clients' },
-            { value: '99%', label: 'Client Satisfaction' },
-          ].map((stat, index) => (
-            <div key={index} className="hero-stat text-center md:text-left opacity-0">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-                {stat.value}
-              </div>
-              <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-500 uppercase tracking-wider">
-                {stat.label}
-              </p>
-            </div>
-          ))}
-        </div>
+
       </div>
 
       {/* Scroll indicator */}

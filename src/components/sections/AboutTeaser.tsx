@@ -134,20 +134,7 @@ export default function AboutTeaser() {
               </div>
             </div>
             
-            {/* Floating card */}
-            <div className="absolute -bottom-6 right-0 sm:-bottom-8 sm:-right-8 bg-zinc-900 border border-zinc-800 rounded-xl p-5 md:p-6 shadow-2xl z-10">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center shrink-0">
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-xl sm:text-2xl font-bold text-white">5+</p>
-                  <p className="text-xs sm:text-sm text-zinc-500">Years of Experience</p>
-                </div>
-              </div>
-            </div>
+
           </div>
 
           {/* Content side */}
@@ -173,7 +160,7 @@ export default function AboutTeaser() {
               animation="fade"
               className="text-lg text-zinc-400 leading-relaxed"
             >
-              I&apos;m a Full Stack Engineer with a passion for building products that 
+              I&apos;m an AI & Automation Developer with a passion for building products that 
               make a difference. From scalable cloud infrastructure to beautiful 
               user interfaces, I bring ideas to life with clean code and thoughtful design.
             </TextReveal>

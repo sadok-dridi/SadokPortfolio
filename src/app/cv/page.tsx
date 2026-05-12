@@ -37,7 +37,7 @@ export default function CVPage() {
           {/* Header */}
           <div className="border-b-2 border-zinc-200 pb-6 mb-8">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-2 text-zinc-900">SADOK DRIDI</h1>
-            <h2 className="text-xl font-medium text-cyan-600 mb-4">Full Stack Engineer | AI & Automation Systems</h2>
+            <h2 className="text-xl font-medium text-cyan-600 mb-4">AI & Automation Developer</h2>
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-zinc-600 font-medium">
               <span>Tunis, Tunisia</span>
               <span>sadok.dridi.engineer@gmail.com</span>

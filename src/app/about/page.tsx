@@ -2,15 +2,12 @@
 
 import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import TextReveal from '@/components/ui/TextReveal';
 import MagneticButton from '@/components/ui/MagneticButton';
 import { TransitionLink } from '@/components/layout/PageTransition';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const skills = [
   {
@@ -33,14 +30,14 @@ const skills = [
 
 const experience = [
   {
-    period: 'Present',
-    title: 'Freelance Full Stack Engineer',
-    company: 'Self-Employed',
-    description: 'Building real-world, cost-effective systems combining modern web technologies, AI integrations, and automated infrastructure for clients worldwide.',
+    period: '2024 - Present',
+    title: 'Independent Projects & Building',
+    company: 'Independent',
+    description: 'Building production-deployed web applications and AI-powered tools independently. Focused on real deployment, real infrastructure, real problems.',
     color: '#06b6d4',
   },
   {
-    period: '2021 - 2026',
+    period: '2023 - 2026',
     title: 'Software Engineering Student',
     company: 'ESPRIT (EUR-ACE Accredited)',
     description: 'Project-based engineering curriculum focusing on distributed systems, software architecture, database design, web technologies, and artificial intelligence.',
@@ -50,7 +47,6 @@ const experience = [
 
 export default function AboutPage() {
   const heroRef = useRef<HTMLElement>(null);
-  const statsRef = useRef<HTMLDivElement>(null);
 
   // Master entrance timeline for hero section
   useEffect(() => {
@@ -85,33 +81,7 @@ export default function AboutPage() {
     };
   }, []);
 
-  useEffect(() => {
-    const stats = statsRef.current;
-    if (!stats) return;
 
-    const items = stats.querySelectorAll('.stat-item');
-    
-    items.forEach((item) => {
-      gsap.fromTo(
-        item,
-        { y: 40, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: item,
-            start: 'top 85%',
-          },
-        }
-      );
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach(st => st.kill());
-    };
-  }, []);
 
   return (
     <>
@@ -131,10 +101,7 @@ export default function AboutPage() {
               </h1>
               
               <p className="about-description mt-4 md:mt-6 text-base sm:text-lg md:text-xl text-zinc-400 leading-relaxed opacity-0">
-                I&apos;m a Full Stack Engineer passionate about creating digital experiences 
-                that combine beautiful design with powerful functionality. With expertise 
-                in modern web technologies and cloud infrastructure, I help businesses 
-                transform their ideas into reality.
+                I'm Sadok, a software engineering student at ESPRIT (Tunisia) in my 3rd year. I build real, working products — not just homework projects. My focus is on AI integration, automation workflows, and full stack web applications that solve actual problems. I'm motivated by building things that work in production, not just on localhost. Currently open to freelance projects and remote opportunities.
               </p>
 
               <div className="about-buttons mt-6 md:mt-8 flex flex-wrap gap-3 sm:gap-4 opacity-0">
@@ -171,38 +138,11 @@ export default function AboutPage() {
                 />
               </div>
               
-              {/* Floating elements */}
-              <div className="absolute -bottom-4 -left-2 sm:-bottom-6 sm:-left-6 px-4 sm:px-6 py-3 sm:py-4 bg-zinc-900 border border-zinc-800 rounded-lg sm:rounded-xl">
-                <div className="text-2xl sm:text-3xl font-bold text-white">5+</div>
-                <div className="text-xs sm:text-sm text-zinc-500">Years Experience</div>
-              </div>
-              
-              <div className="absolute -top-4 -right-2 sm:-top-6 sm:-right-6 px-4 sm:px-6 py-3 sm:py-4 bg-zinc-900 border border-zinc-800 rounded-lg sm:rounded-xl">
-                <div className="text-2xl sm:text-3xl font-bold text-white">20+</div>
-                <div className="text-xs sm:text-sm text-zinc-500">Projects Completed</div>
-              </div>
+
             </div>
           </div>
         </section>
 
-        {/* Stats */}
-        <section className="py-12 md:py-20 bg-zinc-900/30 border-y border-zinc-800/50">
-          <div ref={statsRef} className="container mx-auto px-4 sm:px-6 md:px-12">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12">
-              {[
-                { value: '5+', label: 'Years of Experience' },
-                { value: '20+', label: 'Projects Delivered' },
-                { value: '15+', label: 'Happy Clients' },
-                { value: '99%', label: 'Client Satisfaction' },
-              ].map((stat, index) => (
-                <div key={index} className="stat-item text-center">
-                  <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">{stat.value}</div>
-                  <div className="mt-1 sm:mt-2 text-[10px] sm:text-xs md:text-sm text-zinc-500 uppercase tracking-wider">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* Skills */}
         <section className="container mx-auto px-4 sm:px-6 md:px-12 py-16 md:py-32">
