@@ -1,4 +1,4 @@
 docker build -t sadok-portfolio .
 docker rm -f portfolio-web
-docker run -d --name portfolio-web -p 127.0.0.1:3006:3000 --restart unless-stopped sadok-portfolio
+docker run -d --name portfolio-web -p 127.0.0.1:3006:3000 --restart unless-stopped --env-file .env.local sadok-portfolio
 
