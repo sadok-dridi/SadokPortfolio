@@ -17,7 +17,19 @@ git branch -M main
 git push -u origin main
 ```
 
-## 2. Deploy on your VPS
+## 2. Environment Variables (First time only)
+
+Create a `.env.local` file on the server with your Telegram credentials:
+```bash
+cat > ~/portfolio/.env.local << 'EOF'
+TELEGRAM_BOT_TOKEN=your_actual_bot_token
+TELEGRAM_CHAT_ID=your_actual_chat_id
+EOF
+```
+
+> This file is in `.gitignore` and will never be committed. You only need to create it once.
+
+## 3. Deploy on your VPS
 
 SSH into your VPS:
 ```bash
@@ -43,6 +55,7 @@ docker run -d \
   --name portfolio-web \
   -p 127.0.0.1:3006:3000 \
   --restart unless-stopped \
+  --env-file .env.local \
   sadok-portfolio
 ```
 
@@ -90,7 +103,7 @@ To secure your site with HTTPS:
 sudo certbot --nginx -d your-domain.com -d www.your-domain.com
 ```
 
-## 4. Future Updates
+## 5. Future Updates
 
 When you make changes locally:
 1. Push changes to GitHub.
@@ -101,5 +114,10 @@ cd ~/portfolio
 git pull origin main
 docker build -t sadok-portfolio .
 docker rm -f portfolio-web
-docker run -d --name portfolio-web -p 127.0.0.1:3006:3000 --restart unless-stopped sadok-portfolio
+docker run -d \
+  --name portfolio-web \
+  -p 127.0.0.1:3006:3000 \
+  --restart unless-stopped \
+  --env-file .env.local \
+  sadok-portfolio
 ```
