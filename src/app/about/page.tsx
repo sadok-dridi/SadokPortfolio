@@ -147,7 +147,7 @@ export default function AboutPage() {
                   </MagneticButton>
                 </TransitionLink>
                 
-                <a href="/cv" download>
+                <a href="/SadokDridiResume.pdf" download="SadokDridiResume.pdf">
                   <MagneticButton
                     as="div"
                     className="px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base border border-zinc-700 text-white font-medium rounded-full hover:bg-zinc-800 transition-colors"
