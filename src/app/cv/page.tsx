@@ -67,13 +67,13 @@ export default function CVPage() {
             
             <div className="mb-6">
               <div className="flex justify-between items-baseline mb-1">
-                <h4 className="text-md font-bold text-zinc-900">radarX | Hybrid-Cloud AI Intelligence Platform</h4>
+                <h4 className="text-md font-bold text-zinc-900">Paragon | Automated Opportunity Scraper & Market Analytics</h4>
               </div>
-              <p className="text-xs text-cyan-600 font-mono mb-2">Next.js, PostgreSQL, Prisma, n8n, Ollama, Docker, SSH Tunneling</p>
+              <p className="text-xs text-cyan-600 font-mono mb-2">Next.js, PostgreSQL, Prisma, n8n, Ollama, Docker, Python, SSH Tunneling</p>
               <ul className="list-disc list-outside ml-4 space-y-1 text-sm text-zinc-700">
-                <li>Engineered a hybrid-cloud opportunity routing system using Next.js and PostgreSQL on a VPS, automating data ingestion via self-hosted n8n workflows.</li>
-                <li>Reduced AI API costs by an estimated 90% by configuring secure reverse SSH tunnels to offload heavy LLM processing from the VPS to a local machine running Ollama.</li>
-                <li>Implemented stateless JWT authentication (jose, bcryptjs) and robust Role-Based Access Control (RBAC) to secure internal operator dashboards.</li>
+                <li>Built a personal intelligence engine that scrapes jobs and paid tasks from across the internet, filters them against a profile using self-hosted AI, and surfaces only relevant matches.</li>
+                <li>Eliminated AI API costs entirely by configuring reverse SSH tunnels to offload LLM processing from the VPS to a local machine running Ollama.</li>
+                <li>Designed automated ingestion pipelines with Python containers and n8n workflows for flexible multi-source scraping, deduplication, and enrichment.</li>
               </ul>
             </div>
 

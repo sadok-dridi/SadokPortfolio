@@ -158,7 +158,17 @@ function ProjectCard({ project, index }: ProjectCardProps) {
           tiltAmount={5}
         >
           <div ref={imageRef} className="absolute inset-0">
-            {project.images[0] ? (
+            {index === 0 && project.thumbnail ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-black">
+                <Image
+                  src={project.thumbnail}
+                  alt={project.title}
+                  width={200}
+                  height={150}
+                  className="object-contain w-auto h-auto max-w-[50%] max-h-[50%]"
+                />
+              </div>
+            ) : project.images[0] ? (
               <Image
                 src={project.images[0]}
                 alt={project.title}

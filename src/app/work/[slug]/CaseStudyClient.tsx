@@ -8,7 +8,8 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { TransitionLink } from '@/components/layout/PageTransition';
 import MagneticButton from '@/components/ui/MagneticButton';
-import ParallaxImage from '@/components/ui/ParallaxImage';
+import { CaseGallery, type GalleryPhoto } from '@/components/ui/case-gallery';
+
 import { Project } from '@/data/projects';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -16,9 +17,10 @@ gsap.registerPlugin(ScrollTrigger);
 interface CaseStudyClientProps {
   project: Project;
   nextProject: Project;
+  galleryPhotos: GalleryPhoto[];
 }
 
-export default function CaseStudyClient({ project, nextProject }: CaseStudyClientProps) {
+export default function CaseStudyClient({ project, nextProject, galleryPhotos }: CaseStudyClientProps) {
   const heroImageRef = useRef<HTMLDivElement>(null);
   const heroContentRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -100,50 +102,87 @@ export default function CaseStudyClient({ project, nextProject }: CaseStudyClien
       
       <main className="pt-24">
         {/* Hero Section */}
-        <section className="relative h-[70vh] min-h-[500px] overflow-hidden">
-          <div ref={heroImageRef} className="absolute inset-0 opacity-0">
-            {project.images[0] ? (
-              <Image
-                src={project.images[0]}
-                alt={project.title}
-                fill
-                className="object-cover"
-                priority
-                sizes="100vw"
-              />
-            ) : (
-              <div 
-                className="absolute inset-0" 
-                style={{ 
-                  background: `linear-gradient(135deg, ${project.color}40, ${project.color}10, #09090b)` 
-                }}
-              />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
-          </div>
-
-          {/* Hero content */}
-          <div ref={heroContentRef} className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
-            <div className="container mx-auto">
-              <div className="case-badges flex flex-wrap items-center gap-4 mb-4 opacity-0">
-                <span className="px-3 py-1 text-xs font-medium text-white bg-zinc-900/80 backdrop-blur-sm rounded-full border border-zinc-800">
-                  {project.category}
-                </span>
-                <span className="text-zinc-400">{project.year}</span>
-                <span className="text-zinc-600">*</span>
-                <span className="text-zinc-400">{project.role}</span>
-              </div>
-
-              <h1 className="case-title text-4xl md:text-6xl lg:text-7xl font-bold text-white opacity-0">
-                {project.title}
-              </h1>
-              
-              <p className="case-subtitle mt-4 text-xl md:text-2xl text-zinc-300 max-w-2xl opacity-0">
-                {project.subtitle}
-              </p>
+        {project.slug === 'paragon' ? (
+          <section className="relative h-[45vh] min-h-[360px] overflow-hidden bg-zinc-950">
+            <div ref={heroImageRef} className="absolute inset-0 flex items-center justify-center p-12 opacity-0">
+              {project.thumbnail && (
+                <Image
+                  src={project.thumbnail}
+                  alt={project.title}
+                  width={300}
+                  height={226}
+                  className="object-contain w-auto h-auto max-w-[200px] md:max-w-[300px] max-h-[30vh]"
+                  priority
+                />
+              )}
             </div>
-          </div>
-        </section>
+
+            <div ref={heroContentRef} className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
+              <div className="container mx-auto">
+                <div className="case-badges flex flex-wrap items-center gap-4 mb-4 opacity-0">
+                  <span className="px-3 py-1 text-xs font-medium text-white bg-zinc-900/80 backdrop-blur-sm rounded-full border border-zinc-800">
+                    {project.category}
+                  </span>
+                  <span className="text-zinc-400">{project.year}</span>
+                  <span className="text-zinc-600">*</span>
+                  <span className="text-zinc-400">{project.role}</span>
+                </div>
+
+                <h1 className="case-title text-4xl md:text-6xl lg:text-7xl font-bold text-white opacity-0">
+                  {project.title}
+                </h1>
+                
+                <p className="case-subtitle mt-4 text-xl md:text-2xl text-zinc-300 max-w-2xl opacity-0">
+                  {project.subtitle}
+                </p>
+              </div>
+            </div>
+          </section>
+        ) : (
+          <section className="relative h-[70vh] min-h-[500px] overflow-hidden">
+            <div ref={heroImageRef} className="absolute inset-0 opacity-0">
+              {project.images[0] ? (
+                <Image
+                  src={project.images[0]}
+                  alt={project.title}
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="100vw"
+                />
+              ) : (
+                <div 
+                  className="absolute inset-0" 
+                  style={{ 
+                    background: `linear-gradient(135deg, ${project.color}40, ${project.color}10, #09090b)` 
+                  }}
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
+            </div>
+
+            <div ref={heroContentRef} className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
+              <div className="container mx-auto">
+                <div className="case-badges flex flex-wrap items-center gap-4 mb-4 opacity-0">
+                  <span className="px-3 py-1 text-xs font-medium text-white bg-zinc-900/80 backdrop-blur-sm rounded-full border border-zinc-800">
+                    {project.category}
+                  </span>
+                  <span className="text-zinc-400">{project.year}</span>
+                  <span className="text-zinc-600">*</span>
+                  <span className="text-zinc-400">{project.role}</span>
+                </div>
+
+                <h1 className="case-title text-4xl md:text-6xl lg:text-7xl font-bold text-white opacity-0">
+                  {project.title}
+                </h1>
+                
+                <p className="case-subtitle mt-4 text-xl md:text-2xl text-zinc-300 max-w-2xl opacity-0">
+                  {project.subtitle}
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Main Content */}
         <div ref={contentRef} className="container mx-auto px-6 md:px-12 py-20">
@@ -197,30 +236,6 @@ export default function CaseStudyClient({ project, nextProject }: CaseStudyClien
               </div>
             </div>
           </section>
-
-          {/* Gallery */}
-          {project.images.length > 0 && (
-            <section className="reveal-section opacity-0 mb-24">
-              <h2 className="text-sm text-cyan-500 uppercase tracking-widest mb-8">Gallery</h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                {project.images.map((image, index) => (
-                  <div
-                    key={index}
-                    className={`relative rounded-2xl overflow-hidden ${
-                      index === 0 ? 'md:col-span-2 aspect-video' : 'aspect-[4/3]'
-                    }`}
-                  >
-                    <ParallaxImage
-                      src={image}
-                      alt={`${project.title} screenshot ${index + 1}`}
-                      containerClassName="h-full"
-                      speed={0.1}
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
 
           {/* Challenge, Solution, Results */}
           {(project.challenges || project.solutions || project.results) && (
@@ -278,6 +293,14 @@ export default function CaseStudyClient({ project, nextProject }: CaseStudyClien
                   </ul>
                 </div>
               )}
+            </section>
+          )}
+
+          {/* Gallery */}
+          {galleryPhotos.length > 0 && (
+            <section className="reveal-section opacity-0 mb-24">
+              <h2 className="text-sm text-cyan-500 uppercase tracking-widest mb-8">Gallery</h2>
+              <CaseGallery photos={galleryPhotos} color={project.color} />
             </section>
           )}
 

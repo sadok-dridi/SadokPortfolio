@@ -71,13 +71,14 @@ export default function ParallaxImage({
       ref={containerRef}
       className={cn('overflow-hidden', containerClassName)}
     >
-      <div ref={imageRef} className="w-full h-full">
+      <div ref={imageRef} className="relative w-full h-full">
         {fill ? (
           <Image
             src={src}
             alt={alt}
             fill
             className={cn('object-cover', className)}
+            sizes="(max-width: 768px) 100vw, 50vw"
             priority={priority}
           />
         ) : (
